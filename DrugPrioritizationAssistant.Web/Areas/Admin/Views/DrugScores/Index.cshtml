@@ -1,0 +1,767 @@
+﻿@using DrugPrioritizationAssistant.Application.DTOs
+@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model List<DrugScoreListItemDto>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "امتیازدهی داروها";
+
+
+var currentUser =
+    await UserManager.GetUserAsync(User);
+
+    var canCalculate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "DrugScores.Calculate");
+
+    var totalDrugs =
+        Model.Count;
+
+    var readyCount =
+        Model.Count(x =>
+            x.HasNeedAssessment &&
+            x.HasFeasibilityAssessment);
+
+    var scoredCount =
+        Model.Count(x =>
+            x.HasScore);
+
+    var incompleteCount =
+        totalDrugs - readyCount;
+
+    var rankedCount =
+        Model.Count(x =>
+            x.Rank.HasValue &&
+            x.Rank.Value > 0);
+
+    var needWeight =
+        Convert.ToDecimal(ViewBag.NeedWeight ?? 60m);
+
+    var feasibilityWeight =
+        Convert.ToDecimal(ViewBag.FeasibilityWeight ?? 40m);
+
+
+}
+
+<!-- Header -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+   
+    <div>
+
+        <h2 class="mb-1">
+            امتیازدهی داروها
+        </h2>
+
+        <p class="text-muted mb-0">
+            محاسبه و بررسی امتیاز فرصت تولید داخلی داروها
+        </p>
+
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+
+        @if (rankedCount > 0)
+        {
+            <span class="badge bg-warning-subtle text-warning-emphasis">
+
+                <i class="bi bi-trophy me-1"></i>
+
+                @rankedCount دارو رتبه‌بندی شده
+
+            </span>
+        }
+
+        @if (canCalculate)
+        {
+            <form asp-area="Admin"
+                  asp-controller="DrugScores"
+                  asp-action="RecalculateAll"
+                  method="post"
+                  class="d-inline">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-primary"
+                        onclick="return confirm('امتیاز همه داروها بر اساس وزن‌های فعلی مجدداً محاسبه و رتبه‌بندی شوند؟');">
+
+                    <i class="bi bi-arrow-repeat me-1"></i>
+
+                    محاسبه مجدد همه
+
+                </button>
+
+            </form>
+
+            <form asp-area="Admin"
+                  asp-controller="DrugScores"
+                  asp-action="RankAll"
+                  method="post"
+                  class="d-inline">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-outline-primary">
+
+                    <i class="bi bi-bar-chart-steps me-1"></i>
+
+                    به‌روزرسانی رتبه‌بندی
+
+                </button>
+
+            </form>
+        }
+
+    </div>
+   
+
+</div>
+
+<!-- Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success">
+
+   
+    <i class="bi bi-check-circle me-2"></i>
+
+    @TempData["SuccessMessage"]
+
+</div>
+
+
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+<div class="alert alert-danger">
+
+   
+    <i class="bi bi-exclamation-triangle me-2"></i>
+
+    @TempData["ErrorMessage"]
+
+</div>
+
+
+}
+
+<!-- Statistics -->
+
+<div class="row g-3 mb-4">
+
+   
+    <!-- کل داروها -->
+
+    <div class="col-md-3">
+
+        <div class="card dpa-card h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+                        <i class="bi bi-capsule-pill"></i>
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="text-muted small">
+                            کل داروها
+                        </div>
+
+                        <div class="fs-4 fw-bold">
+                            @totalDrugs
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- آماده محاسبه -->
+
+    <div class="col-md-3">
+
+        <div class="card dpa-card h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="text-muted small">
+                            آماده محاسبه
+                        </div>
+
+                        <div class="fs-4 fw-bold">
+                            @readyCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- امتیاز محاسبه شده -->
+
+    <div class="col-md-3">
+
+        <div class="card dpa-card h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="text-muted small">
+                            امتیاز محاسبه‌شده
+                        </div>
+
+                        <div class="fs-4 fw-bold">
+                            @scoredCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ارزیابی ناقص -->
+
+    <div class="col-md-3">
+
+        <div class="card dpa-card h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+                        <i class="bi bi-exclamation-circle"></i>
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="text-muted small">
+                            ارزیابی ناقص
+                        </div>
+
+                        <div class="fs-4 fw-bold">
+                            @incompleteCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+   
+
+</div>
+
+<!-- Main Table -->
+
+<div class="card dpa-card">
+
+   
+    <div class="dpa-card-header">
+
+        <div>
+
+            <h5 class="mb-1">
+                وضعیت امتیازدهی
+            </h5>
+
+            <div class="text-muted small">
+                وضعیت آمادگی هر دارو برای محاسبه و رتبه‌بندی
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        @if (Model.Count == 0)
+        {
+            <div class="text-center py-5">
+
+                <i class="bi bi-capsule display-4 text-muted"></i>
+
+                <h5 class="mt-3">
+                    هنوز دارویی ثبت نشده است
+                </h5>
+
+                <p class="text-muted">
+                    ابتدا از بخش داروها، داروهای مورد نظر را ثبت کنید.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>دارو</th>
+
+                            <th>امتیاز نیاز</th>
+
+                            <th>امکان تولید</th>
+
+                            <th>امتیاز فرصت</th>
+
+                            <th>وضعیت</th>
+
+                            <th>رتبه</th>
+
+                            <th>عملیات</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            var isReady =
+                            item.HasNeedAssessment &&
+                            item.HasFeasibilityAssessment;
+
+                            var statusText = "";
+                            var statusClass = "";
+                            var statusIcon = "";
+
+                            if (!item.HasNeedAssessment)
+                            {
+                                statusText =
+                                "ارزیابی نیاز ناقص";
+
+                                statusClass =
+                                "bg-warning-subtle text-warning-emphasis";
+
+                                statusIcon =
+                                "bi-clipboard2-x";
+                            }
+                            else if (!item.HasFeasibilityAssessment)
+                            {
+                                statusText =
+                                "امکان تولید ناقص";
+
+                                statusClass =
+                                "bg-info-subtle text-info-emphasis";
+
+                                statusIcon =
+                                "bi-flask";
+                            }
+                            else if (item.HasScore)
+                            {
+                                statusText =
+                                "امتیاز محاسبه شده";
+
+                                statusClass =
+                                "bg-success-subtle text-success";
+
+                                statusIcon =
+                                "bi-check-circle-fill";
+                            }
+                            else
+                            {
+                                statusText =
+                                "آماده محاسبه";
+
+                                statusClass =
+                                "bg-primary-subtle text-primary";
+
+                                statusIcon =
+                                "bi-calculator";
+                            }
+
+                            <tr>
+
+                                <!-- ID -->
+
+                                <td class="text-muted">
+                                    @item.DrugId
+                                </td>
+
+
+                                <!-- Drug -->
+
+                                <td>
+
+                                    <div class="fw-semibold">
+                                        @item.DrugName
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                item.GenericName))
+                                    {
+                                        <div class="small text-muted">
+                                            @item.GenericName
+                                        </div>
+                                    }
+
+                                </td>
+
+
+                                <!-- Need Score -->
+
+                                <td>
+
+                                    @if (item.NeedScore.HasValue)
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary">
+
+                                            @item.NeedScore.Value.ToString("0.00")
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Feasibility Score -->
+
+                                <td>
+
+                                    @if (item.FeasibilityScore.HasValue)
+                                    {
+                                        <span class="badge bg-info-subtle text-info-emphasis">
+
+                                            @item.FeasibilityScore.Value.ToString("0.00")
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Opportunity Score -->
+
+                                <td>
+
+                                    @if (item.OpportunityScore.HasValue)
+                                    {
+                                        <span class="badge bg-success-subtle text-success fs-6">
+
+                                            @item.OpportunityScore.Value.ToString("0.00")
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Status -->
+
+                                <td>
+
+                                    <span class="badge rounded-pill @statusClass">
+
+                                        <i class="bi @statusIcon me-1"></i>
+
+                                        @statusText
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Rank -->
+
+                                <td>
+
+                                    @if (item.Rank.HasValue &&
+                                                                item.Rank.Value > 0)
+                                    {
+                                        if (item.Rank.Value == 1)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+
+                                                <i class="bi bi-trophy-fill me-1"></i>
+
+                                                1
+
+                                            </span>
+                                        }
+                                        else if (item.Rank.Value == 2)
+                                        {
+                                            <span class="badge bg-secondary">
+
+                                                <i class="bi bi-award-fill me-1"></i>
+
+                                                2
+
+                                            </span>
+                                        }
+                                        else if (item.Rank.Value == 3)
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning-emphasis">
+
+                                                <i class="bi bi-award me-1"></i>
+
+                                                3
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark border">
+
+                                                @item.Rank
+
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Operations -->
+
+                                <td>
+
+                                    @if (isReady && canCalculate)
+                                    {
+                                        <form asp-area="Admin"
+                                              asp-controller="DrugScores"
+                                              asp-action="Calculate"
+                                              method="post"
+                                              class="d-inline">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="drugId"
+                                                   value="@item.DrugId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-sm @(item.HasScore
+                                                                                                        ? "btn-outline-primary"
+                                                                                                        : "btn-primary")">
+
+                                    <i class="bi @(item.HasScore
+                                                                                       ? "bi-arrow-repeat"
+                                                                                       : "bi-calculator") me-1"></i>
+
+                                    @(item.HasScore
+                                                                        ? "محاسبه مجدد"
+                                                                        : "محاسبه امتیاز")
+
+                                </button>
+
+                                        </form>
+                                                        }
+                                    else if (!isReady)
+                                    {
+                                        <span class="text-muted small">
+                                            ابتدا ارزیابی‌ها را کامل کنید
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+
+    </div>
+   
+
+</div>
+
+<!-- Formula -->
+
+<div class="card dpa-card mt-4">
+
+   
+    <div class="card-body">
+
+        <h5 class="mb-3">
+
+            <i class="bi bi-info-circle me-2"></i>
+
+            فرمول امتیاز فرصت
+
+        </h5>
+
+
+        <p class="text-muted">
+
+            امتیاز فرصت تولید داخلی از ترکیب شاخص نیاز و شاخص امکان تولید
+            محاسبه می‌شود.
+
+        </p>
+
+
+        <div class="row g-3">
+
+            <!-- Need -->
+
+            <div class="col-md-6">
+
+                <div class="p-3 bg-primary-subtle rounded">
+
+                    <div class="fw-semibold text-primary">
+                        شاخص نیاز
+                    </div>
+
+                    <div class="mt-2">
+                        وزن:
+                        <strong>
+                            @needWeight.ToString("0.##")٪
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Feasibility -->
+
+            <div class="col-md-6">
+
+                <div class="p-3 bg-success-subtle rounded">
+
+                    <div class="fw-semibold text-success">
+                        شاخص امکان تولید
+                    </div>
+
+                    <div class="mt-2">
+                        وزن:
+                        <strong>
+                            @feasibilityWeight.ToString("0.##")٪
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="alert alert-light border mt-3 mb-0">
+
+            <strong>
+                فرمول:
+            </strong>
+
+            <span class="ms-2">
+
+                امتیاز فرصت =
+
+                (
+                @needWeight.ToString("0.##")٪
+                × امتیاز نیاز
+                )
+
+                +
+
+                (
+                @feasibilityWeight.ToString("0.##")٪
+                × امتیاز امکان تولید
+                )
+
+            </span>
+
+        </div>
+
+
+        <div class="text-muted small mt-2">
+
+            برای اعمال وزن‌های جدید روی تمام داروها،
+            از گزینه «محاسبه مجدد همه» استفاده کنید.
+
+        </div>
+
+    </div>
+   
+
+</div>

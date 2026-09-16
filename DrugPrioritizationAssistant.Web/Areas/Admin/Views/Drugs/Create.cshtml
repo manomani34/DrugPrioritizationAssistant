@@ -1,0 +1,298 @@
+﻿@{
+    ViewData["Title"] = "ثبت داروی جدید";
+}
+
+<div class="mb-4">
+
+    
+    <div>
+        <h2 class="fw-bold mb-2">
+            ثبت داروی جدید
+        </h2>
+
+        <p class="text-muted mb-0">
+            اطلاعات پایه داروی موردنظر را در سامانه ثبت کنید.
+        </p>
+    </div>
+    
+
+</div>
+
+<div class="row">
+
+    
+    <div class="col-xl-9 col-lg-10">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="dashboard-stat-icon
+                            bg-primary-subtle
+                            text-primary">
+
+                        <i class="bi bi-capsule-pill"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="mb-1 fw-bold">
+                            اطلاعات دارو
+                        </h5>
+
+                        <small class="text-muted">
+                            فیلدهای دارای علامت
+                            <span class="text-danger">*</span>
+                            الزامی هستند.
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dpa-card-body">
+
+                <form asp-area="Admin"
+                      asp-controller="Drugs"
+                      asp-action="Create"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
+                    </div>
+
+
+                    <div class="row g-4">
+
+
+                        <!-- نام دارو -->
+
+                        <div class="col-md-6">
+
+                            <label for="name"
+                                   class="form-label">
+
+                                نام دارو
+
+                                <span class="text-danger">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   class="form-control"
+                                   placeholder="مثلاً آموکسی‌سیلین"
+                                   value="@ViewData.ModelState["name"]?.AttemptedValue"
+                                   required />
+
+                            @if (ViewData.ModelState["name"]?.Errors.Count > 0)
+                            {
+                                <div class="text-danger small mt-1">
+                                    @ViewData.ModelState["name"]?.Errors[0].ErrorMessage
+                                </div>
+                            }
+
+                        </div>
+
+
+                        <!-- نام ژنریک -->
+
+                        <div class="col-md-6">
+
+                            <label for="genericName"
+                                   class="form-label">
+
+                                نام ژنریک
+
+                            </label>
+
+                            <input type="text"
+                                   id="genericName"
+                                   name="genericName"
+                                   class="form-control"
+                                   placeholder="مثلاً Amoxicillin"
+                                   value="@ViewData.ModelState["genericName"]?.AttemptedValue" />
+
+                        </div>
+
+
+                        <!-- ماده مؤثره -->
+
+                        <div class="col-md-6">
+
+                            <label for="activeIngredient"
+                                   class="form-label">
+
+                                ماده مؤثره
+
+                            </label>
+
+                            <input type="text"
+                                   id="activeIngredient"
+                                   name="activeIngredient"
+                                   class="form-control"
+                                   placeholder="مثلاً Amoxicillin"
+                                   value="@ViewData.ModelState["activeIngredient"]?.AttemptedValue" />
+
+                        </div>
+
+
+                        <!-- شکل دارویی -->
+
+                        <div class="col-md-6">
+
+                            <label for="dosageForm"
+                                   class="form-label">
+
+                                شکل دارویی
+
+                            </label>
+
+                            <input type="text"
+                                   id="dosageForm"
+                                   name="dosageForm"
+                                   class="form-control"
+                                   placeholder="مثلاً قرص، کپسول، آمپول"
+                                   value="@ViewData.ModelState["dosageForm"]?.AttemptedValue" />
+
+                        </div>
+
+
+                        <!-- گروه درمانی -->
+
+                        <div class="col-md-6">
+
+                            <label for="therapeuticCategory"
+                                   class="form-label">
+
+                                گروه درمانی
+
+                            </label>
+
+                            <input type="text"
+                                   id="therapeuticCategory"
+                                   name="therapeuticCategory"
+                                   class="form-control"
+                                   placeholder="مثلاً آنتی‌بیوتیک"
+                                   value="@ViewData.ModelState["therapeuticCategory"]?.AttemptedValue" />
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="my-4" />
+
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                        <a asp-area="Admin"
+                           asp-controller="Drugs"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-arrow-right me-1"></i>
+
+                            بازگشت به فهرست
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+
+                            <i class="bi bi-check-lg me-1"></i>
+
+                            ثبت دارو
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- راهنما -->
+
+    <div class="col-xl-3 col-lg-2 mt-4 mt-xl-0">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <h6 class="mb-0 fw-bold">
+                    راهنمای ثبت
+                </h6>
+
+            </div>
+
+            <div class="dpa-card-body">
+
+                <div class="d-flex gap-3 mb-4">
+
+                    <i class="bi bi-info-circle-fill
+                          text-primary fs-5">
+                    </i>
+
+                    <small class="text-muted">
+                        اطلاعات پایه دارو در مراحل بعدی
+                        برای ارزیابی نیاز و امکان تولید
+                        مورد استفاده قرار می‌گیرد.
+                    </small>
+
+                </div>
+
+
+                <div class="d-flex gap-3 mb-4">
+
+                    <i class="bi bi-clipboard2-pulse-fill
+                          text-warning fs-5">
+                    </i>
+
+                    <small class="text-muted">
+                        پس از ثبت دارو می‌توانید ارزیابی
+                        میزان نیاز و وضعیت تأمین آن را انجام دهید.
+                    </small>
+
+                </div>
+
+
+                <div class="d-flex gap-3">
+
+                    <i class="bi bi-flask-fill
+                          text-success fs-5">
+                    </i>
+
+                    <small class="text-muted">
+                        اطلاعات امکان تولید در مرحله بعد
+                        ثبت و تحلیل خواهد شد.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+
+</div>

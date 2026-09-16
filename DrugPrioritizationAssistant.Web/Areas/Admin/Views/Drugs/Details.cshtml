@@ -1,0 +1,545 @@
+﻿@model DrugPrioritizationAssistant.Domain.Entities.Drug
+@using DrugPrioritizationAssistant.Domain.Entities
+
+@{
+    ViewData["Title"] = "جزئیات دارو";
+
+
+var needAssessment =
+    ViewBag.NeedAssessment as DrugNeedAssessment;
+
+    var productionFeasibility =
+        ViewBag.ProductionFeasibility as ProductionFeasibility;
+
+    var drugScore =
+        ViewBag.DrugScore as DrugScore;
+
+
+}
+
+<div class="mb-4">
+
+    
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+        <div>
+            <h2 class="fw-bold mb-2">
+                جزئیات دارو
+            </h2>
+
+            <p class="text-muted mb-0">
+                مشاهده اطلاعات کامل داروی ثبت‌شده
+            </p>
+        </div>
+
+        <div>
+
+            <a asp-area="Admin"
+               asp-controller="Drugs"
+               asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+
+                <i class="bi bi-pencil me-1"></i>
+
+                ویرایش دارو
+
+            </a>
+
+        </div>
+
+    </div>
+    
+
+</div>
+
+<div class="row g-4">
+
+    
+    <!-- اطلاعات اصلی -->
+
+    <div class="col-xl-8">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="dashboard-stat-icon
+                            bg-primary-subtle
+                            text-primary">
+
+                        <i class="bi bi-capsule-pill"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="mb-1 fw-bold">
+                            @Model.Name
+                        </h5>
+
+                        <small class="text-muted">
+                            شناسه دارو: #@Model.Id
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dpa-card-body">
+
+                <div class="row g-4">
+
+                    <!-- نام دارو -->
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small mb-1">
+                            نام دارو
+                        </div>
+
+                        <div class="fw-bold">
+                            @Model.Name
+                        </div>
+
+                    </div>
+
+
+                    <!-- نام ژنریک -->
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small mb-1">
+                            نام ژنریک
+                        </div>
+
+                        <div class="fw-bold">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.GenericName))
+                            {
+                                @Model.GenericName
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    ثبت نشده
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ماده مؤثره -->
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small mb-1">
+                            ماده مؤثره
+                        </div>
+
+                        <div class="fw-bold">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.ActiveIngredient))
+                            {
+                                @Model.ActiveIngredient
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    ثبت نشده
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- شکل دارویی -->
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small mb-1">
+                            شکل دارویی
+                        </div>
+
+                        <div class="fw-bold">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.DosageForm))
+                            {
+                                @Model.DosageForm
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    ثبت نشده
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- گروه درمانی -->
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small mb-1">
+                            گروه درمانی
+                        </div>
+
+                        <div class="fw-bold">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.TherapeuticCategory))
+                            {
+                                <span class="badge
+                                                 bg-light
+                                                 text-dark
+                                                 border">
+
+                                    @Model.TherapeuticCategory
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    ثبت نشده
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- وضعیت -->
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small mb-1">
+                            وضعیت
+                        </div>
+
+                        <div>
+
+                            @if (Model.Status ==
+                                                        DrugPrioritizationAssistant.Domain.Enums.DrugStatus.Active)
+                            {
+                                <span class="badge
+                                                 bg-success-subtle
+                                                 text-success">
+
+                                    <i class="bi bi-check-circle me-1"></i>
+
+                                    فعال
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge
+                                                 bg-danger-subtle
+                                                 text-danger">
+
+                                    <i class="bi bi-x-circle me-1"></i>
+
+                                    غیرفعال
+
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- وضعیت فرآیند -->
+
+    <div class="col-xl-4">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <h6 class="mb-0 fw-bold">
+                    وضعیت ارزیابی
+                </h6>
+
+            </div>
+
+            <div class="dpa-card-body">
+
+                <!-- ارزیابی نیاز -->
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="dashboard-stat-icon
+                            @(needAssessment != null
+                                                         ? "bg-success-subtle text-success"
+                                                         : "bg-warning-subtle text-warning")">
+
+                        <i class="bi @(needAssessment != null
+                                                   ? "bi-check-circle-fill"
+                                                   : "bi-clipboard2-pulse")"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="fw-bold">
+                            ارزیابی نیاز
+                        </div>
+
+                        @if (needAssessment != null)
+                        {
+                            <div>
+
+                                <span class="badge
+                                             bg-success-subtle
+                                             text-success">
+
+                                    انجام شده
+
+                                </span>
+
+                                <span class="small fw-semibold text-muted ms-1">
+
+                                    @needAssessment.NeedScore.ToString("0.00")
+
+                                </span>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <small class="text-muted">
+                                هنوز انجام نشده است
+                            </small>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- امکان تولید -->
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="dashboard-stat-icon
+                            @(productionFeasibility != null
+                                                         ? "bg-success-subtle text-success"
+                                                         : "bg-info-subtle text-info")">
+
+                        <i class="bi @(productionFeasibility != null
+                                                   ? "bi-check-circle-fill"
+                                                   : "bi-flask")"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="fw-bold">
+                            امکان تولید
+                        </div>
+
+                        @if (productionFeasibility != null)
+                        {
+                            <div>
+
+                                <span class="badge
+                                             bg-success-subtle
+                                             text-success">
+
+                                    انجام شده
+
+                                </span>
+
+                                <span class="small fw-semibold text-muted ms-1">
+
+                                    @productionFeasibility.FeasibilityScore.ToString("0.00")
+
+                                </span>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <small class="text-muted">
+                                هنوز ارزیابی نشده است
+                            </small>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- امتیاز نهایی -->
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="dashboard-stat-icon
+                            @(drugScore != null
+                                                         ? "bg-success-subtle text-success"
+                                                         : "bg-secondary-subtle text-secondary")">
+
+                        <i class="bi @(drugScore != null
+                                                   ? "bi-check-circle-fill"
+                                                   : "bi-bar-chart-line")"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="fw-bold">
+                            امتیاز نهایی
+                        </div>
+
+                        @if (drugScore != null)
+                        {
+                            <div>
+
+                                <span class="badge
+                                             bg-success-subtle
+                                             text-success">
+
+                                    محاسبه شده
+
+                                </span>
+
+                                <span class="small fw-semibold text-success ms-1">
+
+                                    @drugScore.OpportunityScore.ToString("0.00")
+
+                                </span>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <small class="text-muted">
+                                هنوز محاسبه نشده است
+                            </small>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- اطلاعات ثبت -->
+
+    <div class="col-12">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <h6 class="mb-0 fw-bold">
+                    اطلاعات ثبت
+                </h6>
+
+            </div>
+
+            <div class="dpa-card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <div class="text-muted small mb-1">
+                            شناسه
+                        </div>
+
+                        <strong>
+                            #@Model.Id
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="text-muted small mb-1">
+                            تاریخ ثبت
+                        </div>
+
+                        <strong>
+                            @Model.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="text-muted small mb-1">
+                            آخرین ویرایش
+                        </div>
+
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <strong>
+                                @Model.UpdatedAt.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm")
+                            </strong>
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                هنوز ویرایش نشده است
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+
+</div>
+
+<div class="mt-4">
+
+    
+    <a asp-area="Admin"
+       asp-controller="Drugs"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-right me-1"></i>
+
+        بازگشت به فهرست
+
+    </a>
+    
+
+</div>

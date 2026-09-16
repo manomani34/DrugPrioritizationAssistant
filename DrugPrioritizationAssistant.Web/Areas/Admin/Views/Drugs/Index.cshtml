@@ -1,0 +1,895 @@
+﻿@using DrugPrioritizationAssistant.Domain.Entities
+@using DrugPrioritizationAssistant.Domain.Enums
+@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model List<DrugPrioritizationAssistant.Domain.Entities.Drug>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "مدیریت داروها";
+
+
+var currentUser =
+    await UserManager.GetUserAsync(User);
+
+    var canCreateDrug =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.Create");
+
+    var canEditDrug =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.Edit");
+
+    var canDeleteDrug =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.Delete");
+
+    var canViewDrug =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.View");
+
+    var canCreateNeedAssessment =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "NeedAssessment.Create");
+
+    var canEditNeedAssessment =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "NeedAssessment.Edit");
+
+    var canCreateFeasibility =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ProductionFeasibility.Create");
+
+    var canEditFeasibility =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ProductionFeasibility.Edit");
+
+
+    var assessments =
+        ViewBag.Assessments
+        as Dictionary<int, DrugNeedAssessment>
+        ?? new Dictionary<int, DrugNeedAssessment>();
+
+    var feasibilities =
+        ViewBag.Feasibilities
+        as Dictionary<int, ProductionFeasibility>
+        ?? new Dictionary<int, ProductionFeasibility>();
+
+    var totalDrugs = Model.Count;
+
+    var activeDrugs =
+        Model.Count(x => x.Status == DrugStatus.Active);
+
+    var inactiveDrugs =
+        Model.Count(x => x.Status == DrugStatus.Inactive);
+
+    var therapeuticGroups =
+        Model
+            .Where(x =>
+                !string.IsNullOrWhiteSpace(
+                    x.TherapeuticCategory))
+            .Select(x => x.TherapeuticCategory)
+            .Distinct()
+            .Count();
+
+
+}
+
+<div class="mb-4">
+
+    
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+        <div>
+
+            <h2 class="fw-bold mb-2">
+                مدیریت داروها
+            </h2>
+
+            <p class="text-muted mb-0">
+                ثبت، مشاهده و مدیریت اطلاعات داروهای موجود در سامانه
+            </p>
+
+        </div>
+
+        @if (canCreateDrug)
+        {
+            <div>
+
+                <a asp-area="Admin"
+                   asp-controller="Drugs"
+                   asp-action="Create"
+                   class="btn btn-primary">
+
+                    <i class="bi bi-plus-lg me-1"></i>
+
+                    ثبت داروی جدید
+
+                </a>
+
+            </div>
+        }
+
+    </div>
+    
+
+</div>
+
+<!-- Statistics -->
+
+<div class="row g-4 mb-4">
+
+    
+    <!-- Total -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dpa-card">
+
+            <div class="dashboard-stat">
+
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+
+                        <div class="dashboard-stat-title mt-0">
+                            کل داروها
+                        </div>
+
+                        <div class="dashboard-stat-value">
+                            @totalDrugs
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-stat-icon
+                            bg-primary-subtle
+                            text-primary">
+
+                        <i class="bi bi-capsule-pill"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Active -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dpa-card">
+
+            <div class="dashboard-stat">
+
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+
+                        <div class="dashboard-stat-title mt-0">
+                            داروهای فعال
+                        </div>
+
+                        <div class="dashboard-stat-value">
+                            @activeDrugs
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-stat-icon
+                            bg-success-subtle
+                            text-success">
+
+                        <i class="bi bi-check-circle-fill"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Inactive -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dpa-card">
+
+            <div class="dashboard-stat">
+
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+
+                        <div class="dashboard-stat-title mt-0">
+                            داروهای غیرفعال
+                        </div>
+
+                        <div class="dashboard-stat-value">
+                            @inactiveDrugs
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-stat-icon
+                            bg-danger-subtle
+                            text-danger">
+
+                        <i class="bi bi-x-circle-fill"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Therapeutic Groups -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dpa-card">
+
+            <div class="dashboard-stat">
+
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+
+                        <div class="dashboard-stat-title mt-0">
+                            گروه‌های درمانی
+                        </div>
+
+                        <div class="dashboard-stat-value">
+                            @therapeuticGroups
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-stat-icon
+                            bg-warning-subtle
+                            text-warning">
+
+                        <i class="bi bi-diagram-3-fill"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+
+</div>
+
+<!-- Main Card -->
+
+<div class="dpa-card">
+
+    
+    <!-- Header -->
+
+    <div class="dpa-card-header">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+            <div>
+
+                <h5 class="mb-1 fw-bold">
+                    فهرست داروها
+                </h5>
+
+                <small class="text-muted">
+                    اطلاعات پایه، وضعیت نیاز و امکان تولید داروهای ثبت‌شده
+                </small>
+
+            </div>
+
+            <div style="min-width: 260px;">
+
+                <div class="input-group">
+
+                    <span class="input-group-text bg-white">
+
+                        <i class="bi bi-search"></i>
+
+                    </span>
+
+                    <input type="text"
+                           id="drugSearch"
+                           class="form-control"
+                           placeholder="جستجوی دارو..." />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Table -->
+
+    <div class="dpa-card-body p-0">
+
+        @if (Model.Count == 0)
+        {
+            <div class="text-center py-5">
+
+                <div class="mb-3">
+
+                    <i class="bi bi-capsule text-muted"
+                       style="font-size: 52px;">
+                    </i>
+
+                </div>
+
+                <h5 class="fw-bold">
+                    هنوز دارویی ثبت نشده است
+                </h5>
+
+                <p class="text-muted mb-4">
+                    برای شروع، اولین دارو را در سامانه ثبت کنید.
+                </p>
+
+                @if (canCreateDrug)
+                {
+                    <a asp-area="Admin"
+                       asp-controller="Drugs"
+                       asp-action="Create"
+                       class="btn btn-primary">
+
+                        <i class="bi bi-plus-lg me-1"></i>
+
+                        ثبت اولین دارو
+
+                    </a>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0"
+                       id="drugsTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width: 70px;">
+                                #
+                            </th>
+
+                            <th>
+                                نام دارو
+                            </th>
+
+                            <th>
+                                نام ژنریک
+                            </th>
+
+                            <th>
+                                ماده مؤثره
+                            </th>
+
+                            <th>
+                                شکل دارویی
+                            </th>
+
+                            <th>
+                                گروه درمانی
+                            </th>
+
+                            <th>
+                                وضعیت دارو
+                            </th>
+
+                            <th>
+                                وضعیت نیاز
+                            </th>
+
+                            <th>
+                                امکان تولید
+                            </th>
+
+                            <th style="width: 230px;">
+                                عملیات
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var drug in Model)
+                        {
+                            assessments.TryGetValue(
+                            drug.Id,
+                            out var assessment);
+
+                            var hasAssessment =
+                            assessment != null;
+
+                            var needScore =
+                            assessment?.NeedScore ?? 0;
+
+                            var needLevel = "";
+                            var needClass = "";
+                            var needIcon = "";
+
+                            if (!hasAssessment)
+                            {
+                                needLevel = "ارزیابی نشده";
+                                needClass =
+                                "bg-secondary-subtle text-secondary";
+                                needIcon =
+                                "bi-question-circle";
+                            }
+                            else if (needScore >= 70)
+                            {
+                                needLevel = "نیاز بالا";
+                                needClass =
+                                "bg-danger-subtle text-danger";
+                                needIcon =
+                                "bi-exclamation-triangle-fill";
+                            }
+                            else if (needScore >= 40)
+                            {
+                                needLevel = "نیاز متوسط";
+                                needClass =
+                                "bg-warning-subtle text-warning-emphasis";
+                                needIcon =
+                                "bi-dash-circle-fill";
+                            }
+                            else
+                            {
+                                needLevel = "نیاز پایین";
+                                needClass =
+                                "bg-success-subtle text-success";
+                                needIcon =
+                                "bi-check-circle-fill";
+                            }
+
+
+                            // -----------------------------------------
+                            // Production Feasibility
+                            // -----------------------------------------
+
+                            feasibilities.TryGetValue(
+                            drug.Id,
+                            out var feasibility);
+
+                            var hasFeasibility =
+                            feasibility != null;
+
+                            var feasibilityScore =
+                            feasibility?.FeasibilityScore ?? 0;
+
+                            var feasibilityLevel = "";
+                            var feasibilityClass = "";
+                            var feasibilityIcon = "";
+
+                            if (!hasFeasibility)
+                            {
+                                feasibilityLevel =
+                                "ارزیابی نشده";
+
+                                feasibilityClass =
+                                "bg-secondary-subtle text-secondary";
+
+                                feasibilityIcon =
+                                "bi-question-circle";
+                            }
+                            else if (feasibilityScore >= 70)
+                            {
+                                feasibilityLevel =
+                                "امکان بالا";
+
+                                feasibilityClass =
+                                "bg-success-subtle text-success";
+
+                                feasibilityIcon =
+                                "bi-check-circle-fill";
+                            }
+                            else if (feasibilityScore >= 40)
+                            {
+                                feasibilityLevel =
+                                "امکان متوسط";
+
+                                feasibilityClass =
+                                "bg-warning-subtle text-warning-emphasis";
+
+                                feasibilityIcon =
+                                "bi-dash-circle-fill";
+                            }
+                            else
+                            {
+                                feasibilityLevel =
+                                "امکان پایین";
+
+                                feasibilityClass =
+                                "bg-danger-subtle text-danger";
+
+                                feasibilityIcon =
+                                "bi-x-circle-fill";
+                            }
+
+
+                            <tr>
+
+
+                                <!-- ID -->
+
+                                <td class="text-muted">
+                                    @drug.Id
+                                </td>
+
+
+                                <!-- Name -->
+
+                                <td>
+
+                                    <div class="fw-bold">
+                                        @drug.Name
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Generic Name -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                drug.GenericName))
+                                    {
+                                        @drug.GenericName
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Active Ingredient -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                drug.ActiveIngredient))
+                                    {
+                                        @drug.ActiveIngredient
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Dosage Form -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                drug.DosageForm))
+                                    {
+                                        @drug.DosageForm
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Therapeutic Category -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                drug.TherapeuticCategory))
+                                    {
+                                        <span class="badge
+                                                             bg-light
+                                                             text-dark
+                                                             border">
+
+                                            @drug.TherapeuticCategory
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Drug Status -->
+
+                                <td>
+
+                                    @if (drug.Status == DrugStatus.Active)
+                                    {
+                                        <span class="badge
+                                                             bg-success-subtle
+                                                             text-success">
+
+                                            <i class="bi bi-check-circle me-1"></i>
+
+                                            فعال
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge
+                                                             bg-danger-subtle
+                                                             text-danger">
+
+                                            <i class="bi bi-x-circle me-1"></i>
+
+                                            غیرفعال
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Need Status -->
+
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                                        <span class="badge rounded-pill @needClass">
+
+                                            <i class="bi @needIcon me-1"></i>
+
+                                            @needLevel
+
+                                        </span>
+
+                                        @if (hasAssessment)
+                                        {
+                                            <span class="small fw-semibold text-muted">
+
+                                                @needScore.ToString("0.00")
+
+                                            </span>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Production Feasibility -->
+
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                                        <span class="badge rounded-pill @feasibilityClass">
+
+                                            <i class="bi @feasibilityIcon me-1"></i>
+
+                                            @feasibilityLevel
+
+                                        </span>
+
+                                        @if (hasFeasibility)
+                                        {
+                                            <span class="small fw-semibold text-muted">
+
+                                                @feasibilityScore.ToString("0.00")
+
+                                            </span>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Actions -->
+
+                                <td>
+
+                                    <div class="btn-group">
+
+
+                                        <!-- Need Assessment -->
+                                        @if (hasAssessment && canEditNeedAssessment)
+                                        {
+                                            <a href="/Admin/Drugs/NeedAssessment/@drug.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="ویرایش ارزیابی نیاز">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+                                        }
+                                        else if (!hasAssessment && canCreateNeedAssessment)
+                                        {
+                                            <a href="/Admin/Drugs/NeedAssessment/@drug.Id"
+                                               class="btn btn-sm btn-outline-success"
+                                               title="ثبت ارزیابی نیاز">
+
+                                                <i class="bi bi-clipboard2-pulse"></i>
+
+                                            </a>
+                                        }
+
+
+                                        <!-- Production Feasibility -->
+                                        @if (hasFeasibility && canEditFeasibility)
+                                        {
+                                            <a href="/Admin/Drugs/ProductionFeasibility/@drug.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="ویرایش امکان تولید">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+                                        }
+                                        else if (!hasFeasibility && canCreateFeasibility)
+                                        {
+                                            <a href="/Admin/Drugs/ProductionFeasibility/@drug.Id"
+                                               class="btn btn-sm btn-outline-success"
+                                               title="ثبت امکان تولید">
+
+                                                <i class="bi bi-gear-wide-connected"></i>
+
+                                            </a>
+                                        }
+
+
+                                        <!-- Details -->
+                                        @if (canViewDrug)
+                                        {
+                                            <a href="/Admin/Drugs/Details/@drug.Id"
+                                               class="btn btn-sm btn-outline-secondary"
+                                               title="مشاهده">
+
+                                                <i class="bi bi-eye"></i>
+
+                                            </a>
+                                        }
+
+
+                                        <!-- Edit -->
+                                        @if (canEditDrug)
+                                        {
+                                            <a href="/Admin/Drugs/Edit/@drug.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="ویرایش">
+
+                                                <i class="bi bi-pencil"></i>
+
+                                            </a>
+                                        }
+
+
+                                        <!-- Delete -->
+                                        @if (canDeleteDrug)
+                                        {
+                                            <a href="/Admin/Drugs/Delete/@drug.Id"
+                                               class="btn btn-sm btn-outline-danger"
+                                               title="حذف">
+
+                                                <i class="bi bi-trash"></i>
+
+                                            </a>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+
+    </div>
+    
+
+</div>
+
+@section Scripts
+{
+    <script>
+
+          
+              document
+                  .getElementById("drugSearch")
+                  ?.addEventListener("input", function () {
+
+                      const searchValue =
+                          this.value.toLowerCase().trim();
+
+                      const rows =
+                          document.querySelectorAll(
+                              "#drugsTable tbody tr");
+
+                      rows.forEach(function (row) {
+
+                          const rowText =
+                              row.innerText.toLowerCase();
+
+                          row.style.display =
+                              rowText.includes(searchValue)
+                                  ? ""
+                                  : "none";
+
+                      });
+
+                  });
+
+    </script>
+    
+
+}

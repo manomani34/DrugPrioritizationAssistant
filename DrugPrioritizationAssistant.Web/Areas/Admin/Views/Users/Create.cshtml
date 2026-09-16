@@ -1,0 +1,241 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "ایجاد کاربر";
+
+    var roles =
+        ViewBag.Roles as List<string> ?? [];
+
+    var currentUser =
+        await UserManager.GetUserAsync(User);
+
+    var canCreate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Users.Create");
+}
+
+
+@if (canCreate)
+{
+    <div class="mb-4">
+
+        <h2 class="mb-1">
+            ایجاد کاربر جدید
+        </h2>
+
+        <div class="text-muted">
+            ایجاد حساب کاربری و تعیین نقش اولیه
+        </div>
+
+    </div>
+
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+
+            <div asp-validation-summary="All"></div>
+
+        </div>
+    }
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            <form asp-area="Admin"
+                  asp-controller="Users"
+                  asp-action="Create"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <div class="row g-3">
+
+
+                    <!-- First Name -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            نام
+                        </label>
+
+                        <input type="text"
+                               name="firstName"
+                               class="form-control"
+                               autocomplete="given-name" />
+
+                    </div>
+
+
+                    <!-- Last Name -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            نام خانوادگی
+                        </label>
+
+                        <input type="text"
+                               name="lastName"
+                               class="form-control"
+                               autocomplete="family-name" />
+
+                    </div>
+
+
+                    <!-- Username -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            نام کاربری
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="text"
+                               name="userName"
+                               class="form-control"
+                               autocomplete="username"
+                               required />
+
+                    </div>
+
+
+                    <!-- Email -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            ایمیل
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="email"
+                               name="email"
+                               class="form-control"
+                               autocomplete="email"
+                               required />
+
+                    </div>
+
+
+                    <!-- Password -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            رمز عبور
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="password"
+                               name="password"
+                               class="form-control"
+                               autocomplete="new-password"
+                               required />
+
+                        <div class="form-text">
+                            حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و نماد.
+                        </div>
+
+                    </div>
+
+
+                    <!-- Role -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            نقش
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select name="role"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                انتخاب کنید
+                            </option>
+
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role">
+                                    @role
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+
+                <hr class="my-4" />
+
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-lg me-1"></i>
+
+                        ایجاد کاربر
+
+                    </button>
+
+
+                    <a asp-area="Admin"
+                       asp-controller="Users"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        انصراف
+
+                    </a>
+
+                </div>
+
+
+            </form>
+
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-shield-lock me-2"></i>
+
+        شما مجوز ایجاد کاربر جدید را ندارید.
+
+    </div>
+
+
+    <a asp-area="Admin"
+       asp-controller="Users"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-right me-1"></i>
+
+        بازگشت به مدیریت کاربران
+
+    </a>
+}

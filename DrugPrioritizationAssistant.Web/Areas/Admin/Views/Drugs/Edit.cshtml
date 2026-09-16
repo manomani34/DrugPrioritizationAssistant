@@ -1,0 +1,335 @@
+﻿
+@model DrugPrioritizationAssistant.Domain.Entities.Drug
+
+@{
+    ViewData["Title"] = "ویرایش دارو";
+}
+
+<div class="mb-4">
+
+    <div>
+        <h2 class="fw-bold mb-2">
+            ویرایش دارو
+        </h2>
+
+        <p class="text-muted mb-0">
+            اطلاعات داروی
+            <strong>@Model.Name</strong>
+            را ویرایش کنید.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="row">
+
+    <div class="col-xl-9 col-lg-10">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="dashboard-stat-icon
+                                bg-warning-subtle
+                                text-warning">
+
+                        <i class="bi bi-pencil-square"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="mb-1 fw-bold">
+                            اطلاعات دارو
+                        </h5>
+
+                        <small class="text-muted">
+                            شناسه دارو:
+                            <strong>#@Model.Id</strong>
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dpa-card-body">
+
+                <form asp-area="Admin"
+                      asp-controller="Drugs"
+                      asp-action="Edit"
+                      asp-route-id="@Model.Id"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <input type="hidden"
+                           name="id"
+                           value="@Model.Id" />
+
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
+                    </div>
+
+
+                    <div class="row g-4">
+
+
+                        <!-- نام دارو -->
+
+                        <div class="col-md-6">
+
+                            <label for="name"
+                                   class="form-label">
+
+                                نام دارو
+
+                                <span class="text-danger">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   class="form-control"
+                                   value="@Model.Name"
+                                   required />
+
+                        </div>
+
+
+                        <!-- نام ژنریک -->
+
+                        <div class="col-md-6">
+
+                            <label for="genericName"
+                                   class="form-label">
+
+                                نام ژنریک
+
+                            </label>
+
+                            <input type="text"
+                                   id="genericName"
+                                   name="genericName"
+                                   class="form-control"
+                                   value="@Model.GenericName" />
+
+                        </div>
+
+
+                        <!-- ماده مؤثره -->
+
+                        <div class="col-md-6">
+
+                            <label for="activeIngredient"
+                                   class="form-label">
+
+                                ماده مؤثره
+
+                            </label>
+
+                            <input type="text"
+                                   id="activeIngredient"
+                                   name="activeIngredient"
+                                   class="form-control"
+                                   value="@Model.ActiveIngredient" />
+
+                        </div>
+
+
+                        <!-- شکل دارویی -->
+
+                        <div class="col-md-6">
+
+                            <label for="dosageForm"
+                                   class="form-label">
+
+                                شکل دارویی
+
+                            </label>
+
+                            <input type="text"
+                                   id="dosageForm"
+                                   name="dosageForm"
+                                   class="form-control"
+                                   value="@Model.DosageForm" />
+
+                        </div>
+
+
+                        <!-- گروه درمانی -->
+
+                        <div class="col-md-6">
+
+                            <label for="therapeuticCategory"
+                                   class="form-label">
+
+                                گروه درمانی
+
+                            </label>
+
+                            <input type="text"
+                                   id="therapeuticCategory"
+                                   name="therapeuticCategory"
+                                   class="form-control"
+                                   value="@Model.TherapeuticCategory" />
+
+                        </div>
+
+
+                        <!-- وضعیت -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                وضعیت دارو
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @if (Model.Status ==
+                                                                DrugPrioritizationAssistant.Domain.Enums.DrugStatus.Active)
+                                {
+                                    <span class="badge
+                                                     bg-success-subtle
+                                                     text-success">
+
+                                        <i class="bi bi-check-circle me-1"></i>
+
+                                        فعال
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge
+                                                     bg-danger-subtle
+                                                     text-danger">
+
+                                        <i class="bi bi-x-circle me-1"></i>
+
+                                        غیرفعال
+
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="my-4" />
+
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                        <a asp-area="Admin"
+                           asp-controller="Drugs"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-arrow-right me-1"></i>
+
+                            بازگشت به فهرست
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+
+                            <i class="bi bi-check-lg me-1"></i>
+
+                            ذخیره تغییرات
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- اطلاعات جانبی -->
+
+    <div class="col-xl-3 col-lg-2 mt-4 mt-xl-0">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-header">
+
+                <h6 class="mb-0 fw-bold">
+                    اطلاعات ثبت
+                </h6>
+
+            </div>
+
+            <div class="dpa-card-body">
+
+                <div class="mb-3">
+
+                    <small class="text-muted d-block mb-1">
+                        شناسه دارو
+                    </small>
+
+                    <strong>
+                        #@Model.Id
+                    </strong>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <small class="text-muted d-block mb-1">
+                        تاریخ ثبت
+                    </small>
+
+                    <strong>
+                        @Model.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")
+                    </strong>
+
+                </div>
+
+
+                @if (Model.UpdatedAt.HasValue)
+                {
+                    <div>
+
+                        <small class="text-muted d-block mb-1">
+                            آخرین ویرایش
+                        </small>
+
+                        <strong>
+                            @Model.UpdatedAt.Value
+                            .ToLocalTime()
+                            .ToString("yyyy/MM/dd")
+                        </strong>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

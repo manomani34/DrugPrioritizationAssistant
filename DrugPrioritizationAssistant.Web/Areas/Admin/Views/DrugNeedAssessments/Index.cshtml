@@ -1,0 +1,704 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model List<DrugPrioritizationAssistant.Domain.Entities.DrugNeedAssessment>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "ارزیابی نیاز دارو";
+
+
+var currentUser =
+    await UserManager.GetUserAsync(User);
+
+    var canCreate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "NeedAssessment.Create");
+
+    var canEdit =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "NeedAssessment.Edit");
+
+    var canViewDrug =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.View");
+
+    var totalAssessments = Model.Count;
+
+    var averageNeedScore = Model.Any()
+        ? Model.Average(x => x.NeedScore)
+        : 0;
+
+    var highNeedCount =
+        Model.Count(x => x.NeedScore >= 70);
+
+    var mediumNeedCount =
+        Model.Count(
+            x => x.NeedScore >= 40 &&
+                 x.NeedScore < 70);
+
+
+}
+
+<div class="container-fluid px-0">
+
+    
+    <!-- Page Header -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+
+            <h1 class="h3 fw-bold mb-2">
+
+                <i class="bi bi-clipboard2-pulse me-2"></i>
+
+                ارزیابی نیاز دارو
+
+            </h1>
+
+            <p class="text-muted mb-0">
+                بررسی و امتیازدهی میزان نیاز به تولید یا تأمین داخلی داروها
+            </p>
+
+        </div>
+
+
+        @if (canCreate)
+        {
+            <a asp-area="Admin"
+               asp-controller="Drugs"
+               asp-action="Index"
+               class="btn btn-primary">
+
+                <i class="bi bi-plus-lg me-1"></i>
+
+                شروع ارزیابی جدید
+
+            </a>
+        }
+
+    </div>
+
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="بستن">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Error Message -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="بستن">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Statistics -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- Total -->
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-clipboard-data"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted small mb-1">
+                            کل ارزیابی‌ها
+                        </div>
+
+                        <div class="fs-3 fw-bold">
+                            @totalAssessments
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Average -->
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-speedometer2"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted small mb-1">
+                            میانگین امتیاز نیاز
+                        </div>
+
+                        <div class="fs-3 fw-bold">
+                            @averageNeedScore.ToString("0.00")
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- High Need -->
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted small mb-1">
+                            نیاز بالا
+                        </div>
+
+                        <div class="fs-3 fw-bold">
+                            @highNeedCount
+                        </div>
+
+                        <small class="text-muted">
+                            امتیاز ۷۰ و بالاتر
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Medium Need -->
+
+        <div class="col-12 col-sm-6 col-xl-3">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-bar-chart"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-muted small mb-1">
+                            نیاز متوسط
+                        </div>
+
+                        <div class="fs-3 fw-bold">
+                            @mediumNeedCount
+                        </div>
+
+                        <small class="text-muted">
+                            امتیاز ۴۰ تا ۶۹.۹۹
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Main Card -->
+
+    <div class="dpa-card">
+
+
+        <div class="dpa-card-header">
+
+            <div>
+
+                <h5 class="mb-1 fw-bold">
+                    فهرست ارزیابی‌ها
+                </h5>
+
+                <p class="text-muted small mb-0">
+                    امتیاز نیاز هر دارو بر اساس شاخص‌های تعریف‌شده محاسبه شده است.
+                </p>
+
+            </div>
+
+
+            <div class="position-relative">
+
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+
+                <input type="text"
+                       id="assessmentSearch"
+                       class="form-control ps-5"
+                       placeholder="جستجوی دارو..."
+                       style="min-width: 240px;" />
+
+            </div>
+
+        </div>
+
+
+        <div class="dpa-card-body p-0">
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0"
+                           id="assessmentTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="px-4">
+                                    #
+                                </th>
+
+                                <th>
+                                    دارو
+                                </th>
+
+                                <th>
+                                    ماده مؤثره
+                                </th>
+
+                                <th>
+                                    گروه درمانی
+                                </th>
+
+                                <th>
+                                    امتیاز نیاز
+                                </th>
+
+                                <th>
+                                    سطح نیاز
+                                </th>
+
+                                <th class="text-center">
+                                    عملیات
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                var score =
+                                item.NeedScore;
+
+                                var levelText = "";
+                                var levelClass = "";
+                                var levelIcon = "";
+
+                                if (score >= 70)
+                                {
+                                    levelText = "نیاز بالا";
+
+                                    levelClass =
+                                    "bg-danger-subtle text-danger";
+
+                                    levelIcon =
+                                    "bi-exclamation-triangle-fill";
+                                }
+                                else if (score >= 40)
+                                {
+                                    levelText = "نیاز متوسط";
+
+                                    levelClass =
+                                    "bg-warning-subtle text-warning-emphasis";
+
+                                    levelIcon =
+                                    "bi-dash-circle-fill";
+                                }
+                                else
+                                {
+                                    levelText = "نیاز پایین";
+
+                                    levelClass =
+                                    "bg-success-subtle text-success";
+
+                                    levelIcon =
+                                    "bi-check-circle-fill";
+                                }
+
+
+                                <tr>
+
+
+                                    <!-- ID -->
+
+                                    <td class="px-4 text-muted">
+                                        @item.Id
+                                    </td>
+
+
+                                    <!-- Drug -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @item.Drug.Name
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        item.Drug.GenericName))
+                                        {
+                                            <small class="text-muted">
+                                                @item.Drug.GenericName
+                                            </small>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Active Ingredient -->
+
+                                    <td>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        item.Drug.ActiveIngredient))
+                                        {
+                                            @item.Drug.ActiveIngredient
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Therapeutic Category -->
+
+                                    <td>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        item.Drug.TherapeuticCategory))
+                                        {
+                                            @item.Drug.TherapeuticCategory
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Score -->
+
+                                    <td>
+
+                                        <div class="d-flex align-items-center gap-2">
+
+                                            <strong>
+                                                @score.ToString("0.00")
+                                            </strong>
+
+                                            <div class="progress"
+                                                 style="width: 70px; height: 6px;">
+
+                                                <div class="progress-bar"
+                                                     role="progressbar"
+                                                     style="width: @score.ToString("0.##")%;"
+                                                     aria-valuenow="@score"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100">
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Level -->
+
+                                    <td>
+
+                                        <span class="badge rounded-pill @levelClass">
+
+                                            <i class="bi @levelIcon me-1"></i>
+
+                                            @levelText
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+
+                                    <td class="text-center">
+
+                                        <div class="btn-group"
+                                             role="group">
+
+
+                                            <!-- Edit -->
+                                            @if (canEdit)
+                                            {
+                                                <a asp-area="Admin"
+                                                   asp-controller="DrugNeedAssessments"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@item.Id"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="ویرایش ارزیابی">
+
+                                                    <i class="bi bi-pencil"></i>
+
+                                                </a>
+                                            }
+
+
+                                            <!-- View Drug -->
+                                            @if (canViewDrug)
+                                            {
+                                                <a asp-area="Admin"
+                                                   asp-controller="Drugs"
+                                                   asp-action="Details"
+                                                   asp-route-id="@item.DrugId"
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="مشاهده دارو">
+
+                                                    <i class="bi bi-eye"></i>
+
+                                                </a>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+
+                <div class="text-center py-5 px-4">
+
+                    <div class="mb-3">
+
+                        <i class="bi bi-clipboard2-x display-4 text-muted"></i>
+
+                    </div>
+
+                    <h5 class="fw-bold mb-2">
+                        هنوز ارزیابی‌ای ثبت نشده است
+                    </h5>
+
+                    <p class="text-muted mb-4">
+                        برای شروع، یکی از داروهای ثبت‌شده را انتخاب کرده
+                        و شاخص‌های نیاز آن را ارزیابی کنید.
+                    </p>
+
+
+                    @if (canCreate)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Drugs"
+                           asp-action="Index"
+                           class="btn btn-primary">
+
+                            <i class="bi bi-capsule me-1"></i>
+
+                            مشاهده داروها
+
+                        </a>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- Information -->
+
+    <div class="alert alert-light border mt-4">
+
+        <div class="d-flex gap-3">
+
+            <div class="text-primary fs-4">
+
+                <i class="bi bi-info-circle"></i>
+
+            </div>
+
+            <div>
+
+                <div class="fw-semibold mb-1">
+                    نحوه محاسبه امتیاز نیاز
+                </div>
+
+                <div class="small text-muted">
+
+                    امتیاز نیاز فعلاً بر اساس شش شاخص محاسبه می‌شود:
+                    شدت کمبود، وابستگی به واردات، سطح تولید داخلی،
+                    میزان تقاضا، اهمیت درمانی و ناپایداری تأمین.
+
+                    سطح تولید داخلی به‌صورت معکوس در محاسبه لحاظ می‌شود؛
+                    یعنی هرچه تولید داخلی بیشتر باشد، نیاز به تولید یا تأمین
+                    داخلی کمتر در نظر گرفته می‌شود.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+
+</div>
+
+@section Scripts
+{
+    <script>
+
+          
+              document.addEventListener(
+                  "DOMContentLoaded",
+                  function () {
+
+                      const searchInput =
+                          document.getElementById(
+                              "assessmentSearch");
+
+                      const table =
+                          document.getElementById(
+                              "assessmentTable");
+
+                      if (!searchInput || !table) {
+                          return;
+                      }
+
+                      const rows =
+                          table.querySelectorAll(
+                              "tbody tr");
+
+                      searchInput.addEventListener(
+                          "input",
+                          function () {
+
+                              const searchValue =
+                                  this.value
+                                      .trim()
+                                      .toLowerCase();
+
+                              rows.forEach(
+                                  function (row) {
+
+                                      const text =
+                                          row.textContent
+                                              .toLowerCase();
+
+                                      row.style.display =
+                                          text.includes(searchValue)
+                                              ? ""
+                                              : "none";
+
+                                  });
+
+                          });
+
+                  });
+
+    </script>
+    
+
+}

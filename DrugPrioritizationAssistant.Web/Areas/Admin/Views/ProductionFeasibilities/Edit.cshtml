@@ -1,0 +1,880 @@
+﻿@model DrugPrioritizationAssistant.Domain.Entities.ProductionFeasibility
+
+@{
+    ViewData["Title"] = "ویرایش ارزیابی امکان تولید";
+
+    var drug = Model.Drug;
+}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                ویرایش ارزیابی امکان تولید
+            </h2>
+
+            <p class="text-muted mb-0">
+                اصلاح شاخص‌های امکان‌پذیری تولید داخلی دارو
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="ProductionFeasibilities"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-right me-1"></i>
+
+            بازگشت
+        </a>
+
+    </div>
+
+
+    <!-- Drug Information -->
+    <div class="dpa-card mb-4">
+
+        <div class="dpa-card-header">
+
+            <div>
+                <h5 class="mb-1">
+                    <i class="bi bi-capsule me-2"></i>
+
+                    داروی مورد ارزیابی
+                </h5>
+
+                <small class="text-muted">
+                    اطلاعات پایه دارو
+                </small>
+            </div>
+
+            <span class="badge rounded-pill bg-primary-subtle text-primary">
+                ارزیابی موجود
+            </span>
+
+        </div>
+
+
+        <div class="dpa-card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        نام دارو
+                    </div>
+
+                    <div class="fw-bold">
+                        @drug.Name
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        نام ژنریک
+                    </div>
+
+                    <div class="fw-bold">
+                        @(drug.GenericName ?? "-")
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        ماده مؤثره
+                    </div>
+
+                    <div class="fw-bold">
+                        @(drug.ActiveIngredient ?? "-")
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        شکل دارویی
+                    </div>
+
+                    <div class="fw-bold">
+                        @(drug.DosageForm ?? "-")
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <form asp-area="Admin"
+          asp-controller="ProductionFeasibilities"
+          asp-action="Edit"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="id"
+               value="@Model.Id" />
+
+
+        <div class="row g-4">
+
+            <!-- Main Form -->
+            <div class="col-xl-8">
+
+                <div class="dpa-card">
+
+                    <div class="dpa-card-header">
+
+                        <div>
+                            <h5 class="mb-1">
+                                شاخص‌های امکان تولید
+                            </h5>
+
+                            <small class="text-muted">
+                                مقادیر را بین ۰ تا ۱۰۰ تنظیم کنید.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="dpa-card-body">
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+
+                                @Html.ValidationSummary(
+                                false,
+                                                        "",
+                                                        new { @class = "mb-0" })
+
+                        </div>
+                                                }
+
+
+                        <!-- Raw Material Availability -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    دسترسی به مواد اولیه
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="rawMaterialAvailabilityValue">
+                                    @Model.RawMaterialAvailability
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.RawMaterialAvailability"
+                                   name="rawMaterialAvailability"
+                                   id="rawMaterialAvailability"
+                                   oninput="updateValue(
+                                       'rawMaterialAvailability',
+                                       'rawMaterialAvailabilityValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>بسیار کم</span>
+
+                                <span>بسیار زیاد</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Raw Material Cost -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    هزینه مواد اولیه
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="rawMaterialCostValue">
+                                    @Model.RawMaterialCost
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.RawMaterialCost"
+                                   name="rawMaterialCost"
+                                   id="rawMaterialCost"
+                                   oninput="updateValue(
+                                       'rawMaterialCost',
+                                       'rawMaterialCostValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>هزینه بسیار کم</span>
+
+                                <span>هزینه بسیار زیاد</span>
+
+                            </div>
+
+                            <div class="form-text">
+                                هزینه کمتر، امتیاز امکان تولید بالاتری ایجاد می‌کند.
+                            </div>
+
+                        </div>
+
+
+                        <!-- Synthesis Complexity -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    پیچیدگی سنتز
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="synthesisComplexityValue">
+                                    @Model.SynthesisComplexity
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.SynthesisComplexity"
+                                   name="synthesisComplexity"
+                                   id="synthesisComplexity"
+                                   oninput="updateValue(
+                                       'synthesisComplexity',
+                                       'synthesisComplexityValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>بسیار ساده</span>
+
+                                <span>بسیار پیچیده</span>
+
+                            </div>
+
+                            <div class="form-text">
+                                پیچیدگی کمتر، امتیاز امکان تولید بالاتری ایجاد می‌کند.
+                            </div>
+
+                        </div>
+
+
+                        <!-- Enzymatic Route Potential -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    پتانسیل مسیر آنزیمی
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="enzymaticRoutePotentialValue">
+                                    @Model.EnzymaticRoutePotential
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.EnzymaticRoutePotential"
+                                   name="enzymaticRoutePotential"
+                                   id="enzymaticRoutePotential"
+                                   oninput="updateValue(
+                                       'enzymaticRoutePotential',
+                                       'enzymaticRoutePotentialValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>پتانسیل بسیار کم</span>
+
+                                <span>پتانسیل بسیار زیاد</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Expected Yield -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    بازده مورد انتظار
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="expectedYieldValue">
+                                    @Model.ExpectedYield
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.ExpectedYield"
+                                   name="expectedYield"
+                                   id="expectedYield"
+                                   oninput="updateValue(
+                                       'expectedYield',
+                                       'expectedYieldValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>بازده بسیار پایین</span>
+
+                                <span>بازده بسیار بالا</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Purity Potential -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    پتانسیل خلوص
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="purityPotentialValue">
+                                    @Model.PurityPotential
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.PurityPotential"
+                                   name="purityPotential"
+                                   id="purityPotential"
+                                   oninput="updateValue(
+                                       'purityPotential',
+                                       'purityPotentialValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>خلوص بسیار پایین</span>
+
+                                <span>خلوص بسیار بالا</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Scale Up -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    امکان Scale-up
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="scaleUpFeasibilityValue">
+                                    @Model.ScaleUpFeasibility
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.ScaleUpFeasibility"
+                                   name="scaleUpFeasibility"
+                                   id="scaleUpFeasibility"
+                                   oninput="updateValue(
+                                       'scaleUpFeasibility',
+                                       'scaleUpFeasibilityValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>بسیار دشوار</span>
+
+                                <span>بسیار آسان</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Equipment Availability -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    دسترسی به تجهیزات
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="equipmentAvailabilityValue">
+                                    @Model.EquipmentAvailability
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.EquipmentAvailability"
+                                   name="equipmentAvailability"
+                                   id="equipmentAvailability"
+                                   oninput="updateValue(
+                                       'equipmentAvailability',
+                                       'equipmentAvailabilityValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>دسترسی بسیار کم</span>
+
+                                <span>دسترسی بسیار زیاد</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Technical Risk -->
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between">
+
+                                <label class="form-label fw-semibold">
+                                    ریسک فنی
+                                </label>
+
+                                <span class="fw-bold"
+                                      id="technicalRiskValue">
+                                    @Model.TechnicalRisk
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.TechnicalRisk"
+                                   name="technicalRisk"
+                                   id="technicalRisk"
+                                   oninput="updateValue(
+                                       'technicalRisk',
+                                       'technicalRiskValue')">
+
+                            <div class="d-flex justify-content-between small text-muted">
+
+                                <span>ریسک بسیار کم</span>
+
+                                <span>ریسک بسیار زیاد</span>
+
+                            </div>
+
+                            <div class="form-text">
+                                ریسک کمتر، امتیاز امکان تولید بالاتری ایجاد می‌کند.
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+
+                            <a asp-area="Admin"
+                               asp-controller="ProductionFeasibilities"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary">
+
+                                انصراف
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                ذخیره تغییرات
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Score Preview -->
+            <div class="col-xl-4">
+
+                <div class="dpa-card sticky-top"
+                     style="top: 90px;">
+
+                    <div class="dpa-card-header">
+
+                        <div>
+                            <h5 class="mb-1">
+                                امتیاز امکان تولید
+                            </h5>
+
+                            <small class="text-muted">
+                                محاسبه لحظه‌ای
+                            </small>
+                        </div>
+
+                        <i class="bi bi-speedometer2 fs-4"></i>
+
+                    </div>
+
+
+                    <div class="dpa-card-body text-center">
+
+                        <div class="display-3 fw-bold mb-2"
+                             id="feasibilityScore">
+                            @Model.FeasibilityScore.ToString("0.00")
+                        </div>
+
+                        <div class="mb-4">
+
+                            <span class="badge rounded-pill bg-secondary-subtle text-secondary"
+                                  id="feasibilityLevel">
+                                متوسط
+                            </span>
+
+                        </div>
+
+
+                        <div class="progress mb-4"
+                             style="height: 10px;">
+
+                            <div id="feasibilityProgress"
+                                 class="progress-bar"
+                                 role="progressbar">
+                            </div>
+
+                        </div>
+
+
+                        <div class="text-muted small">
+
+                            <p class="mb-2">
+                                امتیاز نهایی از ۰ تا ۱۰۰ محاسبه می‌شود.
+                            </p>
+
+                            <p class="mb-0">
+                                در شاخص‌های هزینه، پیچیدگی و ریسک،
+                                مقدار بالاتر اثر منفی دارد.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Existing Information -->
+
+                <div class="dpa-card mt-4">
+
+                    <div class="dpa-card-header">
+
+                        <h6 class="mb-0">
+
+                            <i class="bi bi-info-circle me-2"></i>
+
+                            اطلاعات ارزیابی
+
+                        </h6>
+
+                    </div>
+
+
+                    <div class="dpa-card-body">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span class="text-muted">
+                                شناسه ارزیابی
+                            </span>
+
+                            <strong>
+                                #@Model.Id
+                            </strong>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="text-muted">
+                                تاریخ ثبت
+                            </span>
+
+                            <strong>
+                                @Model.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Formula -->
+
+                <div class="dpa-card mt-4">
+
+                    <div class="dpa-card-header">
+
+                        <h6 class="mb-0">
+
+                            <i class="bi bi-calculator me-2"></i>
+
+                            منطق محاسبه
+
+                        </h6>
+
+                    </div>
+
+
+                    <div class="dpa-card-body">
+
+                        <p class="small text-muted mb-3">
+                            امتیاز امکان تولید از میانگین ۹ شاخص
+                            محاسبه می‌شود.
+                        </p>
+
+                        <div class="small">
+
+                            <div class="mb-2">
+
+                                <strong>
+                                    شاخص‌های مثبت:
+                                </strong>
+
+                                دسترسی مواد اولیه، مسیر آنزیمی،
+                                بازده، خلوص، Scale-up و تجهیزات
+
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+                                    شاخص‌های معکوس:
+                                </strong>
+
+                                هزینه، پیچیدگی سنتز و ریسک فنی
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        function updateValue(inputId, valueId) {
+
+            const input =
+                document.getElementById(inputId);
+
+            const value =
+                document.getElementById(valueId);
+
+            value.textContent =
+                input.value;
+
+            calculateFeasibilityScore();
+        }
+
+
+        function calculateFeasibilityScore() {
+
+            const rawMaterialAvailability =
+                Number(document.getElementById(
+                    "rawMaterialAvailability").value);
+
+            const rawMaterialCost =
+                Number(document.getElementById(
+                    "rawMaterialCost").value);
+
+            const synthesisComplexity =
+                Number(document.getElementById(
+                    "synthesisComplexity").value);
+
+            const enzymaticRoutePotential =
+                Number(document.getElementById(
+                    "enzymaticRoutePotential").value);
+
+            const expectedYield =
+                Number(document.getElementById(
+                    "expectedYield").value);
+
+            const purityPotential =
+                Number(document.getElementById(
+                    "purityPotential").value);
+
+            const scaleUpFeasibility =
+                Number(document.getElementById(
+                    "scaleUpFeasibility").value);
+
+            const equipmentAvailability =
+                Number(document.getElementById(
+                    "equipmentAvailability").value);
+
+            const technicalRisk =
+                Number(document.getElementById(
+                    "technicalRisk").value);
+
+
+            const rawMaterialCostScore =
+                100 - rawMaterialCost;
+
+            const synthesisComplexityScore =
+                100 - synthesisComplexity;
+
+            const technicalRiskScore =
+                100 - technicalRisk;
+
+
+            const score =
+                (
+                    rawMaterialAvailability +
+                    rawMaterialCostScore +
+                    synthesisComplexityScore +
+                    enzymaticRoutePotential +
+                    expectedYield +
+                    purityPotential +
+                    scaleUpFeasibility +
+                    equipmentAvailability +
+                    technicalRiskScore
+                ) / 9;
+
+
+            document.getElementById(
+                "feasibilityScore"
+            ).textContent =
+                score.toFixed(2);
+
+
+            document.getElementById(
+                "feasibilityProgress"
+            ).style.width =
+                score + "%";
+
+
+            const level =
+                document.getElementById(
+                    "feasibilityLevel"
+                );
+
+
+            if (score >= 70) {
+
+                level.textContent =
+                    "امکان تولید بالا";
+
+                level.className =
+                    "badge rounded-pill bg-success-subtle text-success";
+
+            }
+            else if (score >= 40) {
+
+                level.textContent =
+                    "امکان تولید متوسط";
+
+                level.className =
+                    "badge rounded-pill bg-warning-subtle text-warning-emphasis";
+
+            }
+            else {
+
+                level.textContent =
+                    "امکان تولید پایین";
+
+                level.className =
+                    "badge rounded-pill bg-danger-subtle text-danger";
+
+            }
+
+        }
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                calculateFeasibilityScore();
+
+            }
+        );
+
+    </script>
+
+}

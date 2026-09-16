@@ -1,0 +1,488 @@
+﻿@using DrugPrioritizationAssistant.Application.DTOs
+@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model List<DrugPriorityListItemDto>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "اولویت داروها";
+
+    var currentUser =
+        await UserManager.GetUserAsync(User);
+
+    var canView =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "DrugPriorities.View");
+
+    var totalCount =
+        Model.Count;
+
+    var veryHighCount =
+        Model.Count(x =>
+            x.OpportunityScore >= 80);
+
+    var highCount =
+        Model.Count(x =>
+            x.OpportunityScore >= 65 &&
+            x.OpportunityScore < 80);
+
+    var mediumCount =
+        Model.Count(x =>
+            x.OpportunityScore >= 50 &&
+            x.OpportunityScore < 65);
+}
+
+@if (canView)
+{
+    <div class="container-fluid">
+
+        <!-- Header -->
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+
+                <h2 class="mb-1">
+
+                    <i class="bi bi-trophy me-2"></i>
+
+                    اولویت داروها
+
+                </h2>
+
+                <div class="text-muted">
+                    رتبه‌بندی داروها بر اساس نیاز و امکان تولید داخلی
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Statistics -->
+
+        <div class="row g-3 mb-4">
+
+
+            <div class="col-md-3">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            داروهای رتبه‌بندی شده
+                        </div>
+
+                        <div class="fs-2 fw-bold">
+                            @totalCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            اولویت خیلی بالا
+                        </div>
+
+                        <div class="fs-2 fw-bold text-danger">
+                            @veryHighCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            اولویت بالا
+                        </div>
+
+                        <div class="fs-2 fw-bold text-warning">
+                            @highCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            اولویت متوسط
+                        </div>
+
+                        <div class="fs-2 fw-bold text-primary">
+                            @mediumCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Main Table -->
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+
+                    <i class="bi bi-list-ol me-2"></i>
+
+                    فهرست اولویت داروها
+
+                </h5>
+
+            </div>
+
+
+            <div class="card-body p-0">
+
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5">
+
+                        <i class="bi bi-info-circle fs-1 text-muted"></i>
+
+                        <div class="mt-3 text-muted">
+                            هنوز هیچ دارویی امتیازدهی نشده است.
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th class="text-center">
+                                        رتبه
+                                    </th>
+
+                                    <th>
+                                        دارو
+                                    </th>
+
+                                    <th class="text-center">
+                                        نیاز
+                                    </th>
+
+                                    <th class="text-center">
+                                        امکان تولید
+                                    </th>
+
+                                    <th class="text-center">
+                                        امتیاز فرصت
+                                    </th>
+
+                                    <th class="text-center">
+                                        اولویت
+                                    </th>
+
+                                    <th class="text-center">
+                                        عملیات
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+
+                                        <!-- Rank -->
+
+                                        <td class="text-center">
+
+                                            @if (item.Rank == 1)
+                                            {
+                                                <span class="badge bg-warning text-dark fs-6">
+
+                                                    <i class="bi bi-trophy-fill me-1"></i>
+
+                                                    1
+
+                                                </span>
+                                            }
+                                            else if (item.Rank == 2)
+                                            {
+                                                <span class="badge bg-secondary fs-6">
+                                                    2
+                                                </span>
+                                            }
+                                            else if (item.Rank == 3)
+                                            {
+                                                <span class="badge bg-secondary fs-6">
+                                                    3
+                                                </span>
+                                            }
+                                            else if (item.Rank > 0)
+                                            {
+                                                <span class="badge bg-light text-dark border">
+                                                    @item.Rank
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">
+                                                    —
+                                                </span>
+                                            }
+
+                                        </td>
+
+
+                                        <!-- Drug -->
+
+                                        <td>
+
+                                            <div class="fw-bold">
+                                                @item.DrugName
+                                            </div>
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                                            item.GenericName))
+                                            {
+                                                <div class="small text-muted">
+                                                    @item.GenericName
+                                                </div>
+                                            }
+
+                                        </td>
+
+
+                                        <!-- Need -->
+
+                                        <td class="text-center">
+
+                                            <span class="fw-semibold">
+                                                @item.NeedScore.ToString("0.##")
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- Feasibility -->
+
+                                        <td class="text-center">
+
+                                            <span class="fw-semibold">
+                                                @item.FeasibilityScore.ToString("0.##")
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- Opportunity -->
+
+                                        <td class="text-center">
+
+                                            <span class="fw-bold fs-5">
+                                                @item.OpportunityScore.ToString("0.##")
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- Priority -->
+
+                                        <td class="text-center">
+
+                                            @if (item.PriorityLevel == "خیلی بالا")
+                                            {
+                                                <span class="badge bg-danger">
+                                                    خیلی بالا
+                                                </span>
+                                            }
+                                            else if (item.PriorityLevel == "بالا")
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    بالا
+                                                </span>
+                                            }
+                                            else if (item.PriorityLevel == "متوسط")
+                                            {
+                                                <span class="badge bg-primary">
+                                                    متوسط
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    پایین
+                                                </span>
+                                            }
+
+                                        </td>
+
+
+                                        <!-- Actions -->
+
+                                        <td class="text-center">
+
+                                            @if (canView)
+                                            {
+                                                <a asp-area="Admin"
+                                                   asp-controller="DrugPriorities"
+                                                   asp-action="Details"
+                                                   asp-route-id="@item.DrugId"
+                                                   class="btn btn-sm btn-outline-primary">
+
+                                                    <i class="bi bi-bar-chart-line me-1"></i>
+
+                                                    تحلیل
+
+                                                </a>
+                                            }
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- Explanation -->
+
+        <div class="card shadow-sm border-0 mt-4">
+
+            <div class="card-body">
+
+                <h6 class="fw-bold mb-3">
+
+                    <i class="bi bi-info-circle me-2"></i>
+
+                    نحوه تعیین اولویت
+
+                </h6>
+
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <div class="border rounded p-3">
+
+                            <div class="fw-bold mb-2">
+                                امتیاز نیاز
+                            </div>
+
+                            <div class="text-muted small">
+
+                                میزان نیاز، وابستگی به واردات،
+                                اهمیت درمانی و ریسک تأمین دارو.
+
+                            </div>
+
+                            <div class="mt-2 fw-bold">
+                                وزن: @ViewBag.NeedWeight.ToString("0.##")٪
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="border rounded p-3">
+
+                            <div class="fw-bold mb-2">
+                                امکان تولید
+                            </div>
+
+                            <div class="text-muted small">
+
+                                امکان تأمین مواد اولیه،
+                                پیچیدگی تولید، بازده، خلوص،
+                                تجهیزات و ریسک فنی.
+
+                            </div>
+
+                            <div class="mt-2 fw-bold">
+                                وزن: @ViewBag.FeasibilityWeight.ToString("0.##")٪
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="alert alert-light border mt-3 mb-0">
+
+                    <strong>
+                        امتیاز فرصت =
+                    </strong>
+
+                    @ViewBag.NeedWeight.ToString("0.##")٪ × امتیاز نیاز
+
+                    +
+
+                    @ViewBag.FeasibilityWeight.ToString("0.##")٪ × امتیاز امکان تولید
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}

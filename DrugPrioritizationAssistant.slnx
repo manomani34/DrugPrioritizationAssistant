@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="DrugPrioritizationAssistant.Application/DrugPrioritizationAssistant.Application.csproj" />
+  <Project Path="DrugPrioritizationAssistant.Domain/DrugPrioritizationAssistant.Domain.csproj" />
+  <Project Path="DrugPrioritizationAssistant.Infrastructure/DrugPrioritizationAssistant.Infrastructure.csproj" />
+  <Project Path="DrugPrioritizationAssistant.Web/DrugPrioritizationAssistant.Web.csproj" />
+</Solution>

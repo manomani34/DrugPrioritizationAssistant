@@ -1,0 +1,703 @@
+﻿@model DrugPrioritizationAssistant.Domain.Entities.DrugNeedAssessment
+
+@{
+    ViewData["Title"] = "ویرایش ارزیابی نیاز";
+
+
+var drug = Model.Drug;
+
+
+}
+
+<div class="container-fluid px-0">
+
+    
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-2">
+                <i class="bi bi-pencil-square me-2"></i>
+                ویرایش ارزیابی نیاز
+            </h1>
+
+            <p class="text-muted mb-0">
+                شاخص‌های ارزیابی نیاز این دارو را اصلاح کنید.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="DrugNeedAssessments"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-right me-1"></i>
+            بازگشت
+
+        </a>
+
+    </div>
+
+
+    @if (ViewData.ModelState.ErrorCount > 0)
+    {
+        <div class="alert alert-danger">
+
+            <div class="fw-semibold mb-2">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                لطفاً خطاهای زیر را بررسی کنید.
+            </div>
+
+            <div asp-validation-summary="All"></div>
+
+        </div>
+    }
+
+
+    <div class="row g-4">
+
+        <!-- Main Form -->
+        <div class="col-12 col-xl-8">
+
+            <div class="dpa-card">
+
+                <div class="dpa-card-header">
+
+                    <div>
+                        <h5 class="mb-1 fw-bold">
+                            شاخص‌های ارزیابی نیاز
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            مقادیر شاخص‌ها را از ۰ تا ۱۰۰ اصلاح کنید.
+                        </p>
+                    </div>
+
+                    <span class="badge bg-primary-subtle text-primary">
+                        مقیاس ۰ تا ۱۰۰
+                    </span>
+
+                </div>
+
+
+                <div class="dpa-card-body">
+
+                    <!-- Drug Information -->
+
+                    <div class="border rounded-3 p-3 mb-4 bg-light">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="dashboard-stat-icon">
+                                <i class="bi bi-capsule"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="text-muted small">
+                                    داروی مورد ارزیابی
+                                </div>
+
+                                <div class="fw-bold fs-5">
+                                    @drug.Name
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(drug.GenericName))
+                                {
+                                    <div class="small text-muted">
+                                        @drug.GenericName
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="ms-auto text-muted small">
+                                شناسه #@drug.Id
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <form asp-area="Admin"
+                          asp-controller="DrugNeedAssessments"
+                          asp-action="Edit"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- Shortage Severity -->
+
+                        <div class="assessment-field mb-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <div>
+
+                                    <label class="form-label fw-semibold mb-1">
+                                        شدت کمبود
+                                    </label>
+
+                                    <div class="small text-muted">
+                                        میزان کمبود یا عدم دسترسی به دارو در بازار
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary"
+                                      id="shortageSeverityValue">
+                                    @Model.ShortageSeverity
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range assessment-range"
+                                   id="shortageSeverity"
+                                   name="shortageSeverity"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.ShortageSeverity" />
+
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>کمترین</span>
+                                <span>بیشترین</span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Import Dependency -->
+
+                        <div class="assessment-field mb-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <div>
+
+                                    <label class="form-label fw-semibold mb-1">
+                                        وابستگی به واردات
+                                    </label>
+
+                                    <div class="small text-muted">
+                                        میزان وابستگی تأمین دارو به منابع خارجی
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary"
+                                      id="importDependencyValue">
+                                    @Model.ImportDependency
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range assessment-range"
+                                   id="importDependency"
+                                   name="importDependency"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.ImportDependency" />
+
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>استقلال کامل</span>
+                                <span>وابستگی کامل</span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Domestic Production -->
+
+                        <div class="assessment-field mb-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <div>
+
+                                    <label class="form-label fw-semibold mb-1">
+                                        سطح تولید داخلی
+                                    </label>
+
+                                    <div class="small text-muted">
+                                        میزان تولید فعلی یا ظرفیت تولید داخلی
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary"
+                                      id="domesticProductionLevelValue">
+                                    @Model.DomesticProductionLevel
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range assessment-range"
+                                   id="domesticProductionLevel"
+                                   name="domesticProductionLevel"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.DomesticProductionLevel" />
+
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>تولید بسیار کم</span>
+                                <span>تولید بسیار زیاد</span>
+                            </div>
+
+                            <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small">
+
+                                <i class="bi bi-info-circle me-1"></i>
+
+                                این شاخص معکوس محاسبه می‌شود؛
+                                تولید داخلی بیشتر، امتیاز نیاز کمتری ایجاد می‌کند.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Demand -->
+
+                        <div class="assessment-field mb-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <div>
+
+                                    <label class="form-label fw-semibold mb-1">
+                                        میزان تقاضا
+                                    </label>
+
+                                    <div class="small text-muted">
+                                        میزان مصرف و تقاضای بازار برای دارو
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary"
+                                      id="demandLevelValue">
+                                    @Model.DemandLevel
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range assessment-range"
+                                   id="demandLevel"
+                                   name="demandLevel"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.DemandLevel" />
+
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>تقاضای بسیار کم</span>
+                                <span>تقاضای بسیار زیاد</span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Therapeutic Importance -->
+
+                        <div class="assessment-field mb-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <div>
+
+                                    <label class="form-label fw-semibold mb-1">
+                                        اهمیت درمانی
+                                    </label>
+
+                                    <div class="small text-muted">
+                                        اهمیت دارو در درمان بیماری و سلامت بیماران
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary"
+                                      id="therapeuticImportanceValue">
+                                    @Model.TherapeuticImportance
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range assessment-range"
+                                   id="therapeuticImportance"
+                                   name="therapeuticImportance"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.TherapeuticImportance" />
+
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>اهمیت کم</span>
+                                <span>اهمیت بسیار زیاد</span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Supply Instability -->
+
+                        <div class="assessment-field mb-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <div>
+
+                                    <label class="form-label fw-semibold mb-1">
+                                        ناپایداری تأمین
+                                    </label>
+
+                                    <div class="small text-muted">
+                                        میزان بی‌ثباتی و ریسک در زنجیره تأمین
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary"
+                                      id="supplyInstabilityValue">
+                                    @Model.SupplyInstability
+                                </span>
+
+                            </div>
+
+                            <input type="range"
+                                   class="form-range assessment-range"
+                                   id="supplyInstability"
+                                   name="supplyInstability"
+                                   min="0"
+                                   max="100"
+                                   value="@Model.SupplyInstability" />
+
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>تأمین پایدار</span>
+                                <span>تأمین بسیار ناپایدار</span>
+                            </div>
+
+                        </div>
+
+
+                        <hr class="my-4" />
+
+
+                        <!-- Metadata -->
+
+                        <div class="small text-muted mb-4">
+
+                            <i class="bi bi-clock-history me-1"></i>
+
+                            تاریخ ثبت:
+                            @Model.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")
+
+                        </div>
+
+
+                        <!-- Buttons -->
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a asp-area="Admin"
+                               asp-controller="DrugNeedAssessments"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary">
+
+                                انصراف
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                ذخیره تغییرات
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Score Preview -->
+
+        <div class="col-12 col-xl-4">
+
+            <div class="dpa-card sticky-xl-top"
+                 style="top: 90px;">
+
+                <div class="dpa-card-header">
+
+                    <div>
+                        <h5 class="mb-1 fw-bold">
+                            امتیاز نیاز
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            محاسبه لحظه‌ای
+                        </p>
+                    </div>
+
+                    <i class="bi bi-speedometer2 fs-4 text-primary"></i>
+
+                </div>
+
+
+                <div class="dpa-card-body text-center">
+
+                    <div class="display-3 fw-bold text-primary mb-2"
+                         id="needScore">
+
+                        @Model.NeedScore.ToString("0.00")
+
+                    </div>
+
+                    <div class="text-muted mb-4">
+                        از ۱۰۰
+                    </div>
+
+
+                    <div class="progress mb-3"
+                         style="height: 10px;">
+
+                        <div id="needScoreProgress"
+                             class="progress-bar"
+                             role="progressbar"
+                             style="width: @Model.NeedScore.ToString("0.##")%;"
+                             aria-valuenow="@Model.NeedScore"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+
+                    </div>
+
+
+                    <div id="needLevel"
+                         class="badge rounded-pill px-3 py-2">
+                    </div>
+
+
+                    <hr class="my-4" />
+
+
+                    <div class="text-start">
+
+                        <div class="fw-semibold mb-2">
+                            فرمول فعلی
+                        </div>
+
+                        <div class="small text-muted">
+
+                            امتیاز نیاز برابر است با میانگین شش شاخص.
+                            سطح تولید داخلی به‌صورت معکوس در نظر گرفته می‌شود.
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert alert-light border text-start small mt-3 mb-0">
+
+                        <i class="bi bi-lightbulb text-warning me-1"></i>
+
+                        تغییر هر شاخص، امتیاز نیاز را
+                        به‌صورت لحظه‌ای به‌روزرسانی می‌کند.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+
+</div>
+
+@section Scripts
+{
+    <script>
+
+          
+              document.addEventListener("DOMContentLoaded", function () {
+
+                  const fields = [
+                      {
+                          input: "shortageSeverity",
+                          output: "shortageSeverityValue"
+                      },
+                      {
+                          input: "importDependency",
+                          output: "importDependencyValue"
+                      },
+                      {
+                          input: "domesticProductionLevel",
+                          output: "domesticProductionLevelValue"
+                      },
+                      {
+                          input: "demandLevel",
+                          output: "demandLevelValue"
+                      },
+                      {
+                          input: "therapeuticImportance",
+                          output: "therapeuticImportanceValue"
+                      },
+                      {
+                          input: "supplyInstability",
+                          output: "supplyInstabilityValue"
+                      }
+                  ];
+
+
+                  function getValue(id) {
+
+                      const element =
+                          document.getElementById(id);
+
+                      return Number(element.value) || 0;
+                  }
+
+
+                  function updateScore() {
+
+                      const shortage =
+                          getValue("shortageSeverity");
+
+                      const importDependency =
+                          getValue("importDependency");
+
+                      const domesticProduction =
+                          getValue("domesticProductionLevel");
+
+                      const demand =
+                          getValue("demandLevel");
+
+                      const therapeuticImportance =
+                          getValue("therapeuticImportance");
+
+                      const supplyInstability =
+                          getValue("supplyInstability");
+
+
+                      const domesticProductionNeed =
+                          100 - domesticProduction;
+
+
+                      const score =
+                          (
+                              shortage +
+                              importDependency +
+                              domesticProductionNeed +
+                              demand +
+                              therapeuticImportance +
+                              supplyInstability
+                          ) / 6;
+
+
+                      const roundedScore =
+                          Math.round(score * 100) / 100;
+
+
+                      document.getElementById("needScore")
+                          .textContent =
+                          roundedScore.toFixed(2);
+
+
+                      const progress =
+                          document.getElementById(
+                              "needScoreProgress");
+
+                      progress.style.width =
+                          roundedScore + "%";
+
+                      progress.setAttribute(
+                          "aria-valuenow",
+                          roundedScore);
+
+
+                      const level =
+                          document.getElementById("needLevel");
+
+
+                      if (roundedScore >= 70) {
+
+                          level.className =
+                              "badge rounded-pill bg-danger-subtle text-danger px-3 py-2";
+
+                          level.textContent =
+                              "نیاز بالا";
+
+                      }
+                      else if (roundedScore >= 40) {
+
+                          level.className =
+                              "badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2";
+
+                          level.textContent =
+                              "نیاز متوسط";
+
+                      }
+                      else {
+
+                          level.className =
+                              "badge rounded-pill bg-success-subtle text-success px-3 py-2";
+
+                          level.textContent =
+                              "نیاز پایین";
+
+                      }
+
+                  }
+
+
+                  fields.forEach(function (field) {
+
+                      const input =
+                          document.getElementById(field.input);
+
+                      const output =
+                          document.getElementById(field.output);
+
+
+                      if (!input || !output) {
+                          return;
+                      }
+
+
+                      input.addEventListener(
+                          "input",
+                          function () {
+
+                              output.textContent =
+                                  this.value;
+
+                              updateScore();
+
+                          });
+
+                  });
+
+
+                  updateScore();
+
+              });
+
+    </script>
+    
+
+}

@@ -1,0 +1,147 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "ایجاد نقش";
+
+    var currentUser =
+        await UserManager.GetUserAsync(User);
+
+    var canCreate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Roles.Create");
+}
+
+
+@if (canCreate)
+{
+    <div class="container-fluid">
+
+        <div class="mb-4">
+
+            <h4 class="fw-bold mb-1">
+                ایجاد نقش جدید
+            </h4>
+
+            <div class="text-muted">
+                یک نقش سفارشی برای کاربران سامانه ایجاد کنید.
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-lg-6">
+
+                <div class="card shadow-sm border-0">
+
+                    <div class="card-body">
+
+                        <form asp-area="Admin"
+                              asp-controller="Roles"
+                              asp-action="Create"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger mb-3">
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+
+                                    نام نقش
+
+                                    <span class="text-danger">*</span>
+
+                                </label>
+
+
+                                <input type="text"
+                                       name="name"
+                                       class="form-control"
+                                       required
+                                       maxlength="100"
+                                       placeholder="مثلاً DataAnalyst" />
+
+
+                                <div class="form-text">
+                                    نام نقش باید یکتا باشد.
+                                </div>
+
+                            </div>
+
+
+                            <div class="d-flex gap-2">
+
+                                <button type="submit"
+                                        class="btn btn-primary">
+
+                                    <i class="bi bi-check-lg me-1"></i>
+
+                                    ایجاد نقش
+
+                                </button>
+
+
+                                <a asp-area="Admin"
+                                   asp-controller="Roles"
+                                   asp-action="Index"
+                                   class="btn btn-light">
+
+                                    انصراف
+
+                                </a>
+
+                            </div>
+
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+
+        <div class="alert alert-danger">
+
+            <i class="bi bi-shield-lock me-2"></i>
+
+            شما مجوز ایجاد نقش جدید را ندارید.
+
+        </div>
+
+
+        <a asp-area="Admin"
+           asp-controller="Roles"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-right me-1"></i>
+
+            بازگشت به مدیریت نقش‌ها
+
+        </a>
+
+    </div>
+}

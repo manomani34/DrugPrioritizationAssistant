@@ -1,0 +1,574 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    var currentController =
+        ViewContext.RouteData.Values["controller"]?.ToString();
+
+    var currentUser =
+        await UserManager.GetUserAsync(User);
+
+    var isAuthenticated =
+        User.Identity?.IsAuthenticated == true;
+
+    var currentUserName =
+        currentUser != null
+            ? $"{currentUser.FirstName} {currentUser.LastName}"
+            : "کاربر سامانه";
+
+
+    // =====================================================
+    // Permissions
+    // =====================================================
+
+    var canViewDrugs =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.View");
+
+
+    var canViewNeedAssessment =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "NeedAssessment.View");
+
+
+    var canViewProductionFeasibility =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ProductionFeasibility.View");
+
+
+    var canViewDrugScores =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "DrugScores.View");
+
+
+    var canViewDrugPriorities =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "DrugPriorities.View");
+
+
+    var canViewScoringSettings =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ScoringSettings.View");
+
+
+    var canViewUsers =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Users.View");
+
+
+    var canViewRoles =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Roles.View");
+
+
+    var canViewPermissions =
+        isAuthenticated &&
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Permissions.View");
+
+
+    // =====================================================
+    // Section visibility
+    // =====================================================
+
+    var hasDataManagementAccess =
+        canViewDrugs ||
+        canViewNeedAssessment ||
+        canViewProductionFeasibility;
+
+
+    var hasAnalysisAccess =
+        canViewDrugScores ||
+        canViewDrugPriorities ||
+        canViewScoringSettings;
+
+
+    var hasUserManagementAccess =
+        canViewUsers ||
+        canViewRoles ||
+        canViewPermissions;
+}
+
+<!DOCTYPE html>
+
+<html lang="fa" dir="rtl">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - دستیار هوشمند اولویت‌بندی دارو
+    </title>
+
+
+    <!-- Bootstrap RTL -->
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/bootstrap.rtl.min.css" />
+
+
+    <!-- Bootstrap Icons -->
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
+
+
+    <!-- Application CSS -->
+
+    <link rel="stylesheet"
+          href="~/css/site.css" />
+
+
+    @await RenderSectionAsync(
+    "Styles",
+        required: false)
+
+</head>
+
+
+<body>
+
+    <div class="admin-wrapper">
+
+
+        <!-- =====================================================
+             Sidebar
+             ===================================================== -->
+
+        <aside class="admin-sidebar">
+
+
+            <!-- Brand -->
+
+            <div class="sidebar-brand">
+
+                <div class="sidebar-brand-icon">
+
+                    <i class="bi bi-capsule"></i>
+
+                </div>
+
+
+                <div>
+
+                    <div class="sidebar-brand-title">
+                        دستیار هوشمند دارو
+                    </div>
+
+                    <div class="sidebar-brand-subtitle">
+                        Drug Prioritization Assistant
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Menu -->
+
+            <nav class="sidebar-menu">
+
+
+                <!-- =================================================
+                     Main
+                     ================================================= -->
+
+                <div class="sidebar-section-title">
+                    اصلی
+                </div>
+
+
+                <!-- Dashboard -->
+
+                <a asp-area="Admin"
+                   asp-controller="Home"
+                   asp-action="Index"
+                   class="sidebar-link @(currentController == "Home"
+                                          ? "active"
+                                          : "")">
+
+                    <i class="bi bi-grid-1x2-fill"></i>
+
+                    <span>
+                        داشبورد
+                    </span>
+
+                </a>
+
+
+                <!-- =================================================
+                     Data Management
+                     ================================================= -->
+                @if (hasDataManagementAccess)
+                {
+                    <div class="sidebar-section-title mt-3">
+                        مدیریت داده
+                    </div>
+
+
+                    <!-- Drugs -->
+                    @if (canViewDrugs)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Drugs"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "Drugs"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-capsule-pill"></i>
+
+                            <span>
+                                داروها
+                            </span>
+
+                        </a>
+                                }
+
+
+                    <!-- Need Assessment -->
+                    @if (canViewNeedAssessment)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="DrugNeedAssessments"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "DrugNeedAssessments"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-clipboard2-pulse"></i>
+
+                            <span>
+                                ارزیابی نیاز
+                            </span>
+
+                        </a>
+                                }
+
+
+                    <!-- Production Feasibility -->
+                    @if (canViewProductionFeasibility)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="ProductionFeasibilities"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "ProductionFeasibilities"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-flask"></i>
+
+                            <span>
+                                امکان تولید
+                            </span>
+
+                        </a>
+                                }
+                }
+
+
+                <!-- =================================================
+                     Analysis
+                     ================================================= -->
+                @if (hasAnalysisAccess)
+                {
+                    <div class="sidebar-section-title mt-3">
+                        تحلیل و تصمیم‌گیری
+                    </div>
+
+
+                    <!-- Scoring -->
+                    @if (canViewDrugScores)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="DrugScores"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "DrugScores"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-bar-chart-line-fill"></i>
+
+                            <span>
+                                امتیازدهی
+                            </span>
+
+                        </a>
+                                }
+
+
+                    <!-- Prioritization -->
+                    @if (canViewDrugPriorities)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="DrugPriorities"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "DrugPriorities"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-bar-chart-line-fill"></i>
+
+                            <span>
+                                اولویت‌بندی داروها
+                            </span>
+
+                        </a>
+                                }
+
+
+                    <!-- Scoring Settings -->
+                    @if (canViewScoringSettings)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="ScoringSettings"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "ScoringSettings"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-sliders"></i>
+
+                            <span>
+                                تنظیمات امتیازدهی
+                            </span>
+
+                        </a>
+                                }
+                }
+
+
+                <!-- =================================================
+                     User Management
+                     ================================================= -->
+                @if (hasUserManagementAccess)
+                {
+                    <div class="sidebar-section-title mt-3">
+                        مدیریت کاربران
+                    </div>
+
+
+                    <!-- Users -->
+                    @if (canViewUsers)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Users"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "Users"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-people-fill"></i>
+
+                            <span>
+                                کاربران
+                            </span>
+
+                        </a>
+                                }
+
+
+                    <!-- Roles -->
+                    @if (canViewRoles)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Roles"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "Roles"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-shield-lock-fill"></i>
+
+                            <span>
+                                نقش‌ها
+                            </span>
+
+                        </a>
+                                }
+
+
+                    <!-- Permissions -->
+                    @if (canViewPermissions)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Permissions"
+                           asp-action="Index"
+                           class="sidebar-link @(currentController == "Permissions"
+                                                          ? "active"
+                                                          : "")">
+
+                    <i class="bi bi-key-fill"></i>
+
+                            <span>
+                                دسترسی‌ها
+                            </span>
+
+                        </a>
+                                }
+                }
+
+
+                <!-- =================================================
+                     System
+                     ================================================= -->
+
+                <div class="sidebar-section-title mt-3">
+                    سیستم
+                </div>
+
+
+                <!-- Logout -->
+
+                <form asp-area="Identity"
+                      asp-controller="Account"
+                      asp-action="Logout"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="sidebar-link sidebar-logout">
+
+                        <i class="bi bi-box-arrow-right"></i>
+
+                        <span>
+                            خروج از حساب
+                        </span>
+
+                    </button>
+
+                </form>
+
+
+            </nav>
+
+
+            <!-- =====================================================
+                 Footer
+                 ===================================================== -->
+
+            <div class="sidebar-footer">
+
+                <div class="sidebar-footer-text">
+                    نسخه 1.0.0
+                </div>
+
+            </div>
+
+
+        </aside>
+
+
+        <!-- =====================================================
+             Main
+             ===================================================== -->
+
+        <main class="admin-main">
+
+
+            <!-- Top Navbar -->
+
+            <header class="admin-navbar">
+
+                <div>
+
+                    <h1 class="page-title">
+                        @ViewData["Title"]
+                    </h1>
+
+                    <div class="page-breadcrumb">
+                        سامانه تصمیم‌یار انتخاب و اولویت‌بندی دارو
+                    </div>
+
+                </div>
+
+
+                <!-- User -->
+
+                <div class="admin-user">
+
+                    <div>
+
+                        <div class="admin-user-name">
+                            @currentUserName
+                        </div>
+
+                        <div class="admin-user-role">
+                            @(currentUser?.UserName ?? "کاربر")
+                        </div>
+
+                    </div>
+
+
+                    <div class="admin-user-avatar">
+
+                        <i class="bi bi-person-fill"></i>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <!-- Page Content -->
+
+            <div class="admin-content">
+
+                @RenderBody()
+
+            </div>
+
+
+        </main>
+
+    </div>
+
+
+    <!-- Bootstrap JS -->
+
+    <script src="~/lib/bootstrap/bootstrap.bundle.min.js"></script>
+
+
+    @await RenderSectionAsync(
+    "Scripts",
+        required: false)
+
+</body>
+
+</html>

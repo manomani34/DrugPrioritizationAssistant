@@ -1,0 +1,274 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model DrugPrioritizationAssistant.Application.DTOs.ScoringSettingsDto
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "تنظیمات امتیازدهی";
+
+    var currentUser =
+        await UserManager.GetUserAsync(User);
+
+    var canView =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ScoringSettings.View");
+
+    var canEdit =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ScoringSettings.Edit");
+}
+
+
+@if (canView)
+{
+    <div class="container-fluid">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+
+                <h2 class="mb-1">
+                    تنظیمات امتیازدهی
+                </h2>
+
+                <p class="text-muted mb-0">
+                    تعیین وزن شاخص نیاز و امکان‌پذیری در محاسبه امتیاز فرصت
+                </p>
+
+            </div>
+
+        </div>
+
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+
+                <i class="bi bi-check-circle me-2"></i>
+
+                @TempData["SuccessMessage"]
+
+            </div>
+        }
+
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+
+                <i class="bi bi-exclamation-triangle me-2"></i>
+
+                @TempData["ErrorMessage"]
+
+            </div>
+        }
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <form asp-action="Index"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <div class="row g-4">
+
+
+                    <!-- Need Weight -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="NeedWeight"
+                               class="form-label">
+
+                            وزن شاخص نیاز
+
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <input asp-for="NeedWeight"
+                                   class="form-control"
+                                   type="number"
+                                   min="0"
+                                   max="100"
+                                   step="0.01"
+                                   readonly="@(!canEdit)" />
+
+                            <span class="input-group-text">
+                                %
+                            </span>
+
+                        </div>
+
+
+                        <div class="form-text">
+                            میزان تأثیر شاخص نیاز در امتیاز فرصت
+                        </div>
+
+                    </div>
+
+
+                    <!-- Feasibility Weight -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="FeasibilityWeight"
+                               class="form-label">
+
+                            وزن شاخص امکان‌پذیری
+
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <input asp-for="FeasibilityWeight"
+                                   class="form-control"
+                                   type="number"
+                                   min="0"
+                                   max="100"
+                                   step="0.01"
+                                   readonly="@(!canEdit)" />
+
+                            <span class="input-group-text">
+                                %
+                            </span>
+
+                        </div>
+
+
+                        <div class="form-text">
+                            میزان تأثیر امکان‌پذیری تولید در امتیاز فرصت
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <hr class="my-4" />
+
+
+                <!-- Total -->
+
+                <div class="alert alert-info">
+
+                    <strong>
+                        مجموع وزن‌ها:
+                    </strong>
+
+                    <span id="totalWeight">
+
+                        @((Model.NeedWeight +
+                                                Model.FeasibilityWeight)
+                                                .ToString("0.##"))
+
+                    </span>
+
+                        %
+
+
+                        <div class="mt-2 small">
+
+                            مجموع وزن شاخص نیاز و امکان‌پذیری
+                            باید دقیقاً برابر 100 درصد باشد.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Save -->
+                @if (canEdit)
+                    {
+                        <div class="mt-4">
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                ذخیره تنظیمات
+
+                            </button>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border mt-4 mb-0">
+
+                            <i class="bi bi-lock me-2"></i>
+
+                            شما فقط مجوز مشاهده تنظیمات امتیازدهی را دارید
+                            و امکان تغییر آن برای شما فعال نیست.
+
+                        </div>
+                    }
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+
+@section Scripts
+{
+    <script>
+
+        const needWeight =
+            document.getElementById("NeedWeight");
+
+        const feasibilityWeight =
+            document.getElementById("FeasibilityWeight");
+
+        const totalWeight =
+            document.getElementById("totalWeight");
+
+
+        function updateTotal()
+        {
+            if (!needWeight || !feasibilityWeight || !totalWeight)
+                return;
+
+            const need =
+                parseFloat(needWeight.value) || 0;
+
+            const feasibility =
+                parseFloat(feasibilityWeight.value) || 0;
+
+            totalWeight.textContent =
+                (need + feasibility).toFixed(2);
+        }
+
+
+        if (needWeight && feasibilityWeight)
+        {
+            needWeight.addEventListener(
+                "input",
+                updateTotal);
+
+            feasibilityWeight.addEventListener(
+                "input",
+                updateTotal);
+        }
+
+    </script>
+}

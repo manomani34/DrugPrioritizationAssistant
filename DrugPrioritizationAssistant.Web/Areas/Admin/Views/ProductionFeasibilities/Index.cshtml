@@ -1,0 +1,769 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model List<DrugPrioritizationAssistant.Domain.Entities.ProductionFeasibility>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "ارزیابی امکان تولید";
+
+
+var currentUser =
+    await UserManager.GetUserAsync(User);
+
+    var canCreate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ProductionFeasibility.Create");
+
+    var canEdit =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "ProductionFeasibility.Edit");
+
+    var canViewDrug =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.View");
+
+
+    var totalAssessments = Model.Count;
+
+    var averageScore =
+        Model.Any()
+            ? Model.Average(x => x.FeasibilityScore)
+            : 0;
+
+    var highFeasibilityCount =
+        Model.Count(x => x.FeasibilityScore >= 70);
+
+    var mediumFeasibilityCount =
+        Model.Count(x =>
+            x.FeasibilityScore >= 40 &&
+            x.FeasibilityScore < 70);
+
+    var lowFeasibilityCount =
+        Model.Count(x => x.FeasibilityScore < 40);
+
+
+}
+
+<div class="container-fluid">
+
+   
+    <!-- Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                ارزیابی امکان تولید
+            </h2>
+
+            <p class="text-muted mb-0">
+                بررسی و مقایسه امکان تولید داخلی داروها
+            </p>
+
+        </div>
+
+
+        @if (canCreate)
+        {
+            <a asp-area="Admin"
+               asp-controller="Drugs"
+               asp-action="Index"
+               class="btn btn-primary">
+
+                <i class="bi bi-plus-lg me-1"></i>
+
+                شروع ارزیابی جدید
+
+            </a>
+        }
+
+    </div>
+
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+
+            <i class="bi bi-check-circle me-2"></i>
+
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Error Message -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+
+            <i class="bi bi-exclamation-triangle me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Statistics -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- Total -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-clipboard-data"></i>
+
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="small text-muted">
+                            کل ارزیابی‌ها
+                        </div>
+
+                        <div class="fs-4 fw-bold">
+                            @totalAssessments
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Average -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-speedometer2"></i>
+
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="small text-muted">
+                            میانگین امکان تولید
+                        </div>
+
+                        <div class="fs-4 fw-bold">
+                            @averageScore.ToString("0.00")
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- High -->
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-check-circle"></i>
+
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="small text-muted">
+                            بالا
+                        </div>
+
+                        <div class="fs-4 fw-bold text-success">
+                            @highFeasibilityCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Medium -->
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-dash-circle"></i>
+
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="small text-muted">
+                            متوسط
+                        </div>
+
+                        <div class="fs-4 fw-bold text-warning">
+                            @mediumFeasibilityCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Low -->
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="dpa-card dashboard-stat h-100">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="dashboard-stat-icon">
+
+                        <i class="bi bi-x-circle"></i>
+
+                    </div>
+
+                    <div class="ms-3">
+
+                        <div class="small text-muted">
+                            پایین
+                        </div>
+
+                        <div class="fs-4 fw-bold text-danger">
+                            @lowFeasibilityCount
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Search -->
+
+    <div class="dpa-card mb-4">
+
+        <div class="dpa-card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-6">
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+
+                            <i class="bi bi-search"></i>
+
+                        </span>
+
+                        <input type="text"
+                               id="searchInput"
+                               class="form-control"
+                               placeholder="جستجو بر اساس نام دارو، ماده مؤثره یا دسته درمانی..." />
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+
+                    <span class="text-muted small">
+
+                        نمایش
+
+                        <strong id="visibleCount">
+                            @totalAssessments
+                        </strong>
+
+                        ارزیابی
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Table -->
+
+    <div class="dpa-card">
+
+        <div class="dpa-card-header">
+
+            <div>
+
+                <h5 class="mb-1">
+                    فهرست ارزیابی‌ها
+                </h5>
+
+                <small class="text-muted">
+                    رتبه‌بندی بر اساس امتیاز امکان تولید
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="dpa-card-body p-0">
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0"
+                           id="feasibilityTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="px-4">
+                                    #
+                                </th>
+
+                                <th>
+                                    دارو
+                                </th>
+
+                                <th>
+                                    ماده مؤثره
+                                </th>
+
+                                <th>
+                                    دسته درمانی
+                                </th>
+
+                                <th style="min-width: 220px;">
+                                    امکان تولید
+                                </th>
+
+                                <th>
+                                    وضعیت
+                                </th>
+
+                                <th class="text-center">
+                                    عملیات
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                var score =
+                                item.FeasibilityScore;
+
+                                var level = "";
+                                var badgeClass = "";
+                                var icon = "";
+
+                                if (score >= 70)
+                                {
+                                    level = "امکان تولید بالا";
+
+                                    badgeClass =
+                                    "bg-success-subtle text-success";
+
+                                    icon =
+                                    "bi-check-circle-fill";
+                                }
+                                else if (score >= 40)
+                                {
+                                    level = "امکان تولید متوسط";
+
+                                    badgeClass =
+                                    "bg-warning-subtle text-warning-emphasis";
+
+                                    icon =
+                                    "bi-dash-circle-fill";
+                                }
+                                else
+                                {
+                                    level = "امکان تولید پایین";
+
+                                    badgeClass =
+                                    "bg-danger-subtle text-danger";
+
+                                    icon =
+                                    "bi-x-circle-fill";
+                                }
+
+
+                                <tr class="feasibility-row">
+
+
+                                    <!-- ID -->
+
+                                    <td class="px-4">
+
+                                        <span class="text-muted">
+                                            #@item.Id
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Drug -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @item.Drug.Name
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        item.Drug.GenericName))
+                                        {
+                                            <div class="small text-muted">
+                                                @item.Drug.GenericName
+                                            </div>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Active Ingredient -->
+
+                                    <td>
+
+                                        @(item.Drug.ActiveIngredient ?? "-")
+
+                                    </td>
+
+
+                                    <!-- Therapeutic Category -->
+
+                                    <td>
+
+                                        @(item.Drug.TherapeuticCategory ?? "-")
+
+                                    </td>
+
+
+                                    <!-- Score -->
+
+                                    <td>
+
+                                        <div class="d-flex align-items-center gap-3">
+
+                                            <div class="flex-grow-1">
+
+                                                <div class="progress"
+                                                     style="height: 8px;">
+
+                                                    <div class="progress-bar"
+                                                         role="progressbar"
+                                                         style="width: @score.ToString("0.##")%;"
+                                                         aria-valuenow="@score"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100">
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <strong style="min-width: 50px;">
+
+                                                @score.ToString("0.00")
+
+                                            </strong>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Level -->
+
+                                    <td>
+
+                                        <span class="badge rounded-pill @badgeClass">
+
+                                            <i class="bi @icon me-1"></i>
+
+                                            @level
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Operations -->
+
+                                    <td class="text-center">
+
+                                        <div class="d-flex justify-content-center gap-1">
+
+
+                                            <!-- Edit -->
+                                            @if (canEdit)
+                                            {
+                                                <a asp-area="Admin"
+                                                   asp-controller="ProductionFeasibilities"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@item.Id"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="ویرایش ارزیابی">
+
+                                                    <i class="bi bi-pencil-square"></i>
+
+                                                </a>
+                                            }
+
+
+                                            <!-- View Drug -->
+                                            @if (canViewDrug)
+                                            {
+                                                <a asp-area="Admin"
+                                                   asp-controller="Drugs"
+                                                   asp-action="Details"
+                                                   asp-route-id="@item.DrugId"
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="مشاهده دارو">
+
+                                                    <i class="bi bi-eye"></i>
+
+                                                </a>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+
+                <div class="text-center py-5 px-4">
+
+                    <div class="mb-3">
+
+                        <i class="bi bi-clipboard2-x display-4 text-muted"></i>
+
+                    </div>
+
+                    <h5 class="fw-bold">
+                        هنوز ارزیابی‌ای ثبت نشده است
+                    </h5>
+
+                    <p class="text-muted mb-4">
+
+                        برای شروع، از فهرست داروها یک دارو را
+                        انتخاب و ارزیابی امکان تولید آن را ثبت کنید.
+
+                    </p>
+
+
+                    @if (canCreate)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Drugs"
+                           asp-action="Index"
+                           class="btn btn-primary">
+
+                            <i class="bi bi-capsule me-1"></i>
+
+                            مشاهده داروها
+
+                        </a>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- Explanation -->
+
+    <div class="dpa-card mt-4">
+
+        <div class="dpa-card-body">
+
+            <div class="d-flex gap-3">
+
+                <div>
+
+                    <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
+
+                </div>
+
+                <div>
+
+                    <h6 class="fw-bold">
+                        درباره امتیاز امکان تولید
+                    </h6>
+
+                    <p class="text-muted small mb-2">
+
+                        این امتیاز از ۹ شاخص فنی و اقتصادی
+                        محاسبه می‌شود.
+
+                    </p>
+
+                    <p class="text-muted small mb-0">
+
+                        در شاخص‌های هزینه مواد اولیه،
+                        پیچیدگی سنتز و ریسک فنی،
+                        مقدار بالاتر اثر منفی دارد؛
+                        بنابراین این سه شاخص هنگام محاسبه معکوس می‌شوند.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+   
+
+</div>
+
+@section Scripts {
+
+   
+    <script>
+
+        const searchInput =
+            document.getElementById("searchInput");
+
+        const rows =
+            document.querySelectorAll(".feasibility-row");
+
+        const visibleCount =
+            document.getElementById("visibleCount");
+
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    const search =
+                        this.value
+                            .trim()
+                            .toLowerCase();
+
+                    let count = 0;
+
+
+                    rows.forEach(function (row) {
+
+                        const text =
+                            row.textContent.toLowerCase();
+
+
+                        if (text.includes(search)) {
+
+                            row.style.display = "";
+
+                            count++;
+
+                        }
+                        else {
+
+                            row.style.display = "none";
+
+                        }
+
+                    });
+
+
+                    if (visibleCount) {
+                        visibleCount.textContent = count;
+                    }
+
+                });
+
+        }
+
+    </script>
+   
+
+}

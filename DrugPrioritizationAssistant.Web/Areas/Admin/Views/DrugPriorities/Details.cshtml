@@ -1,0 +1,413 @@
+﻿@using DrugPrioritizationAssistant.Application.DTOs
+@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model DrugPriorityExplanationDto
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "تحلیل اولویت دارو";
+
+
+var currentUser =
+    await UserManager.GetUserAsync(User);
+
+    var canViewPriorities =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "DrugPriorities.View");
+
+    var canViewDrugs =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Drugs.View");
+
+    var needWeight =
+        Convert.ToDecimal(ViewBag.NeedWeight ?? 60m);
+
+    var feasibilityWeight =
+        Convert.ToDecimal(ViewBag.FeasibilityWeight ?? 40m);
+
+
+}
+
+@if (canViewPriorities)
+{
+    <div class="container-fluid">
+
+        
+        <!-- Header -->
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+
+                <h2 class="mb-1">
+
+                    <i class="bi bi-bar-chart-line me-2"></i>
+
+                    تحلیل اولویت دارو
+
+                </h2>
+
+                <div class="text-muted">
+                    بررسی عوامل مؤثر بر رتبه و اولویت دارو
+                </div>
+
+            </div>
+
+
+            <div class="d-flex gap-2">
+
+                <a asp-area="Admin"
+                   asp-controller="DrugPriorities"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-arrow-right me-1"></i>
+
+                    بازگشت به اولویت‌ها
+
+                </a>
+
+
+                @if (canViewDrugs)
+                {
+                    <a asp-area="Admin"
+                       asp-controller="Drugs"
+                       asp-action="Details"
+                       asp-route-id="@Model.DrugId"
+                       class="btn btn-outline-primary">
+
+                        <i class="bi bi-capsule me-1"></i>
+
+                        جزئیات دارو
+
+                    </a>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- Main Summary -->
+
+        <div class="row g-3 mb-4">
+
+
+            <!-- Drug -->
+
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            دارو
+                        </div>
+
+                        <h3 class="fw-bold mb-1">
+                            @Model.DrugName
+                        </h3>
+
+                        <div class="text-muted">
+                            رتبه @Model.Rank
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Opportunity -->
+
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body text-center">
+
+                        <div class="text-muted small mb-2">
+                            امتیاز فرصت
+                        </div>
+
+                        <div class="display-5 fw-bold">
+                            @Model.OpportunityScore.ToString("0.##")
+                        </div>
+
+                        <div class="text-muted small mt-1">
+                            از 100
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Priority -->
+
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body text-center">
+
+                        <div class="text-muted small mb-2">
+                            سطح اولویت
+                        </div>
+
+
+                        @if (Model.PriorityLevel == "خیلی بالا")
+                        {
+                            <span class="badge bg-danger fs-5 px-4 py-2">
+                                خیلی بالا
+                            </span>
+                        }
+                        else if (Model.PriorityLevel == "بالا")
+                        {
+                            <span class="badge bg-warning text-dark fs-5 px-4 py-2">
+                                بالا
+                            </span>
+                        }
+                        else if (Model.PriorityLevel == "متوسط")
+                        {
+                            <span class="badge bg-primary fs-5 px-4 py-2">
+                                متوسط
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary fs-5 px-4 py-2">
+                                پایین
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Explanation -->
+
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+
+                    <i class="bi bi-lightbulb me-2"></i>
+
+                    چرا این دارو در این سطح از اولویت قرار گرفته است؟
+
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                @if (!Model.Reasons.Any())
+                {
+                    <div class="alert alert-light border mb-0">
+
+                        <i class="bi bi-info-circle me-2"></i>
+
+                        در حال حاضر عامل برجسته‌ای برای توضیح اولویت
+                        این دارو شناسایی نشده است.
+
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-3">
+
+                        @foreach (var reason in Model.Reasons)
+                        {
+                            <div class="col-lg-6">
+
+                                <div class="border rounded p-3 h-100">
+
+                                    <div class="d-flex justify-content-between align-items-start">
+
+                                        <div>
+
+                                            @if (reason.Type == "need")
+                                            {
+                                                <span class="badge bg-danger-subtle text-danger mb-2">
+                                                    نیاز
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success-subtle text-success mb-2">
+                                                    امکان تولید
+                                                </span>
+                                            }
+
+                                            <div class="fw-bold">
+                                                @reason.Title
+                                            </div>
+
+                                        </div>
+
+
+                                        <span class="badge bg-light text-dark border">
+
+                                            @reason.Score
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="text-muted small mt-2">
+
+                                        @reason.Description
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+                }
+
+        </div>
+
+    </div>
+
+
+    <!-- Score Explanation -->
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-white">
+
+            <h5 class="mb-0">
+
+                <i class="bi bi-calculator me-2"></i>
+
+                ساختار امتیاز فرصت
+
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+
+                <!-- Need Score -->
+
+                <div class="col-md-6">
+
+                    <div class="border rounded p-4 text-center">
+
+                        <div class="text-muted mb-2">
+                            امتیاز نیاز
+                        </div>
+
+                        <div class="fs-2 fw-bold">
+                            @Model.NeedScore.ToString("0.##")
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            وزن در امتیاز نهایی:
+                            @needWeight.ToString("0.##")٪
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Feasibility Score -->
+
+                <div class="col-md-6">
+
+                    <div class="border rounded p-4 text-center">
+
+                        <div class="text-muted mb-2">
+                            امکان تولید
+                        </div>
+
+                        <div class="fs-2 fw-bold">
+                            @Model.FeasibilityScore.ToString("0.##")
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            وزن در امتیاز نهایی:
+                            @feasibilityWeight.ToString("0.##")٪
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Formula -->
+
+            <div class="alert alert-light border mt-3 mb-0">
+
+                <div class="fw-bold mb-2">
+                    <i class="bi bi-calculator me-1"></i>
+                    نحوه محاسبه امتیاز فرصت
+                </div>
+
+                <div class="small">
+
+                    امتیاز فرصت =
+
+                    <strong>
+                        @needWeight.ToString("0.##")٪
+                    </strong>
+
+                    × امتیاز نیاز
+
+                    +
+
+                    <strong>
+                        @feasibilityWeight.ToString("0.##")٪
+                    </strong>
+
+                    × امتیاز امکان تولید
+
+                </div>
+
+                <div class="text-muted small mt-2">
+
+                    وزن‌های فوق از تنظیمات امتیازدهی سامانه خوانده می‌شوند.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+}

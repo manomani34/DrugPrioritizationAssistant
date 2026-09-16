@@ -1,0 +1,196 @@
+﻿@model DrugPrioritizationAssistant.Domain.Entities.Drug
+
+@{
+    ViewData["Title"] = "حذف دارو";
+}
+
+<div class="mb-4">
+
+    <h2 class="fw-bold mb-2">
+        حذف دارو
+    </h2>
+
+    <p class="text-muted mb-0">
+        قبل از حذف، اطلاعات دارو را بررسی کنید.
+    </p>
+
+</div>
+
+
+<div class="row justify-content-center">
+
+    <div class="col-xl-7 col-lg-9">
+
+        <div class="dpa-card">
+
+            <div class="dpa-card-body text-center p-5">
+
+                <div class="mb-4">
+
+                    <div class="mx-auto
+                                d-flex
+                                align-items-center
+                                justify-content-center
+                                bg-danger-subtle
+                                text-danger
+                                rounded-circle"
+                         style="width: 72px; height: 72px;">
+
+                        <i class="bi bi-trash3-fill fs-2"></i>
+
+                    </div>
+
+                </div>
+
+
+                <h4 class="fw-bold mb-3">
+                    آیا از حذف این دارو مطمئن هستید؟
+                </h4>
+
+
+                <p class="text-muted mb-4">
+
+                    داروی
+
+                    <strong class="text-dark">
+                        @Model.Name
+                    </strong>
+
+                    با شناسه
+
+                    <strong class="text-dark">
+                        #@Model.Id
+                    </strong>
+
+                    حذف خواهد شد.
+
+                </p>
+
+
+                <div class="alert alert-warning text-start">
+
+                    <div class="d-flex gap-2">
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                        <div>
+
+                            <strong>
+                                توجه
+                            </strong>
+
+                            <div class="small mt-1">
+                                در صورت حذف دارو، اطلاعات مرتبط با ارزیابی
+                                نیاز، امکان تولید و امتیازدهی آن نیز ممکن است
+                                حذف شود.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="border rounded p-3 mb-4 text-start">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <small class="text-muted d-block mb-1">
+                                نام دارو
+                            </small>
+
+                            <strong>
+                                @Model.Name
+                            </strong>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <small class="text-muted d-block mb-1">
+                                نام ژنریک
+                            </small>
+
+                            <strong>
+                                @(Model.GenericName ?? "ثبت نشده")
+                            </strong>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <small class="text-muted d-block mb-1">
+                                شکل دارویی
+                            </small>
+
+                            <strong>
+                                @(Model.DosageForm ?? "ثبت نشده")
+                            </strong>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <small class="text-muted d-block mb-1">
+                                گروه درمانی
+                            </small>
+
+                            <strong>
+                                @(Model.TherapeuticCategory ?? "ثبت نشده")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <form asp-area="Admin"
+                      asp-controller="Drugs"
+                      asp-action="DeleteConfirmed"
+                      asp-route-id="@Model.Id"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="d-flex justify-content-center gap-2">
+
+                        <a asp-area="Admin"
+                           asp-controller="Drugs"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary px-4">
+
+                            <i class="bi bi-x-lg me-1"></i>
+
+                            انصراف
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-danger px-4">
+
+                            <i class="bi bi-trash3 me-1"></i>
+
+                            حذف دارو
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

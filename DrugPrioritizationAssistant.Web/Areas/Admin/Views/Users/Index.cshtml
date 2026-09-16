@@ -1,0 +1,302 @@
+﻿@using DrugPrioritizationAssistant.Infrastructure.Identity
+@using DrugPrioritizationAssistant.Infrastructure.Services
+@using Microsoft.AspNetCore.Identity
+
+@model List<DrugPrioritizationAssistant.Web.Areas.Admin.Controllers.UserListItemViewModel>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IPermissionService PermissionService
+
+@{
+    ViewData["Title"] = "مدیریت کاربران";
+
+    var currentUser =
+        await UserManager.GetUserAsync(User);
+
+    var canView =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Users.View");
+
+    var canCreate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Users.Create");
+
+    var canDeactivate =
+        currentUser != null &&
+        await PermissionService.HasPermissionAsync(
+            currentUser.Id,
+            "Users.Deactivate");
+}
+
+
+@if (canView)
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="mb-1">
+                مدیریت کاربران
+            </h2>
+
+            <div class="text-muted">
+                مدیریت حساب‌های کاربری و نقش‌های سامانه
+            </div>
+
+        </div>
+
+
+        @if (canCreate)
+        {
+            <a asp-area="Admin"
+               asp-controller="Users"
+               asp-action="Create"
+               class="btn btn-primary">
+
+                <i class="bi bi-person-plus-fill me-1"></i>
+
+                کاربر جدید
+
+            </a>
+        }
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center p-5 text-muted">
+
+                    <i class="bi bi-people"
+                       style="font-size: 48px;"></i>
+
+                    <div class="mt-3">
+                        هنوز کاربری ثبت نشده است.
+                    </div>
+
+
+                    @if (canCreate)
+                    {
+                        <div class="mt-3">
+
+                            <a asp-area="Admin"
+                               asp-controller="Users"
+                               asp-action="Create"
+                               class="btn btn-primary">
+
+                                <i class="bi bi-person-plus-fill me-1"></i>
+
+                                ایجاد اولین کاربر
+
+                            </a>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    کاربر
+                                </th>
+
+                                <th>
+                                    ایمیل
+                                </th>
+
+                                <th>
+                                    نقش
+                                </th>
+
+                                <th>
+                                    وضعیت
+                                </th>
+
+                                <th>
+                                    تاریخ ایجاد
+                                </th>
+
+                                <th>
+                                    آخرین ورود
+                                </th>
+
+                                @if (canDeactivate)
+                                {
+                                    <th>
+                                        عملیات
+                                    </th>
+                                }
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @user.FirstName @user.LastName
+                                        </div>
+
+                                        <div class="small text-muted">
+                                            @user.UserName
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+                                        @user.Email
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (user.Roles.Any())
+                                        {
+                                            foreach (var role in user.Roles)
+                                            {
+                                                <span class="badge bg-secondary me-1">
+                                                    @role
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                بدون نقش
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                فعال
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                غیرفعال
+                                            </span>
+                                        }
+
+                                </td>
+
+
+                                <td>
+                                    @(
+                                                                user.CreatedAt
+                                                                .ToLocalTime()
+                                                                .ToString("yyyy/MM/dd")
+                                                                )
+                                </td>
+
+
+                                    <td>
+
+                            @if (user.LastLoginAt.HasValue)
+                                        {
+                                            @(
+                                                                        user.LastLoginAt.Value
+                                                                        .ToLocalTime()
+                                                                        .ToString("yyyy/MM/dd HH:mm")
+                                                                        )
+                                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                هنوز وارد نشده
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    @if (canDeactivate)
+                                    {
+                                        <td>
+
+                                            <form asp-area="Admin"
+                                                  asp-controller="Users"
+                                                  asp-action="ToggleActive"
+                                                  method="post"
+                                                  class="d-inline">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="@user.Id" />
+
+
+                                                @if (user.IsActive)
+                                                {
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger">
+
+                                                        <i class="bi bi-person-x me-1"></i>
+
+                                                        غیرفعال
+
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-success">
+
+                                                        <i class="bi bi-person-check me-1"></i>
+
+                                                        فعال
+
+                                                    </button>
+                                                }
+
+                                            </form>
+
+                                        </td>
+                                    }
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+}
