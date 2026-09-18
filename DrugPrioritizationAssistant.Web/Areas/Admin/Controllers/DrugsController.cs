@@ -152,6 +152,22 @@ public DrugsController(
             nameof(Index));
     }
 
+    [HttpGet]
+    [RequirePermission("Drugs.View")]
+    public async Task<IActionResult> Details(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        var drug = await _drugRepository.GetByIdAsync(
+            id,
+            cancellationToken);
+
+        if (drug == null)
+            return NotFound();
+
+        return View(drug);
+    }
+
 
 }
 

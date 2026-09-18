@@ -759,7 +759,10 @@ var currentUser =
                                         <!-- Need Assessment -->
                                         @if (hasAssessment && canEditNeedAssessment)
                                         {
-                                            <a href="/Admin/Drugs/NeedAssessment/@drug.Id"
+                                            <a asp-area="Admin"
+                                               asp-controller="DrugNeedAssessments"
+                                               asp-action="Edit"
+                                               asp-route-id="@drug.Id"
                                                class="btn btn-sm btn-outline-primary"
                                                title="ویرایش ارزیابی نیاز">
 
@@ -769,7 +772,10 @@ var currentUser =
                                         }
                                         else if (!hasAssessment && canCreateNeedAssessment)
                                         {
-                                            <a href="/Admin/Drugs/NeedAssessment/@drug.Id"
+                                            <a asp-area="Admin"
+                                               asp-controller="DrugNeedAssessments"
+                                               asp-action="Create"
+                                               asp-route-drugId="@drug.Id"
                                                class="btn btn-sm btn-outline-success"
                                                title="ثبت ارزیابی نیاز">
 
@@ -782,7 +788,10 @@ var currentUser =
                                         <!-- Production Feasibility -->
                                         @if (hasFeasibility && canEditFeasibility)
                                         {
-                                            <a href="/Admin/Drugs/ProductionFeasibility/@drug.Id"
+                                            <a asp-area="Admin"
+                                               asp-controller="ProductionFeasibilities"
+                                               asp-action="Edit"
+                                               asp-route-id="@drug.Id"
                                                class="btn btn-sm btn-outline-primary"
                                                title="ویرایش امکان تولید">
 
@@ -792,7 +801,10 @@ var currentUser =
                                         }
                                         else if (!hasFeasibility && canCreateFeasibility)
                                         {
-                                            <a href="/Admin/Drugs/ProductionFeasibility/@drug.Id"
+                                            <a asp-area="Admin"
+                                               asp-controller="ProductionFeasibilities"
+                                               asp-action="Create"
+                                               asp-route-drugId="@drug.Id"
                                                class="btn btn-sm btn-outline-success"
                                                title="ثبت امکان تولید">
 
@@ -803,22 +815,25 @@ var currentUser =
 
 
                                         <!-- Details -->
-                                        @if (canViewDrug)
-                                        {
-                                            <a href="/Admin/Drugs/Details/@drug.Id"
-                                               class="btn btn-sm btn-outline-secondary"
-                                               title="مشاهده">
+                                        <a asp-area="Admin"
+                                           asp-controller="Drugs"
+                                           asp-action="Details"
+                                           asp-route-id="@drug.Id"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="مشاهده">
 
-                                                <i class="bi bi-eye"></i>
+                                            <i class="bi bi-eye"></i>
 
-                                            </a>
-                                        }
+                                        </a>
 
 
                                         <!-- Edit -->
                                         @if (canEditDrug)
                                         {
-                                            <a href="/Admin/Drugs/Edit/@drug.Id"
+                                            <a asp-area="Admin"
+                                               asp-controller="Drugs"
+                                               asp-action="Edit"
+                                               asp-route-id="@drug.Id"
                                                class="btn btn-sm btn-outline-primary"
                                                title="ویرایش">
 
@@ -830,15 +845,27 @@ var currentUser =
 
                                         <!-- Delete -->
                                         @if (canDeleteDrug)
-                                        {
-                                            <a href="/Admin/Drugs/Delete/@drug.Id"
-                                               class="btn btn-sm btn-outline-danger"
-                                               title="حذف">
+{
+    <form asp-area="Admin"
+          asp-controller="Drugs"
+          asp-action="Delete"
+          asp-route-id="@drug.Id"
+          method="post"
+          class="d-inline"
+          onsubmit="return confirm('آیا از حذف این دارو مطمئن هستید؟');">
 
-                                                <i class="bi bi-trash"></i>
+        @Html.AntiForgeryToken()
 
-                                            </a>
-                                        }
+        <button type="submit"
+                class="btn btn-sm btn-outline-danger"
+                title="حذف">
+
+            <i class="bi bi-trash"></i>
+
+        </button>
+
+    </form>
+}
 
                                     </div>
 
