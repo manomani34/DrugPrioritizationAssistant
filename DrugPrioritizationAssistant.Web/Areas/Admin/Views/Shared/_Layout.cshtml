@@ -498,12 +498,26 @@
              Main
              ===================================================== -->
 
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
         <main class="admin-main">
 
 
             <!-- Top Navbar -->
 
             <header class="admin-navbar">
+
+                <div class="mobile-menu-button-wrapper">
+
+                    <button type="button"
+                            class="mobile-menu-button"
+                            id="mobileMenuButton"
+                            aria-label="باز کردن منو">
+
+                        <i class="bi bi-list"></i>
+
+                    </button>
+
+                </div>
 
                 <div>
 
@@ -564,10 +578,79 @@
 
     <script src="~/lib/bootstrap/bootstrap.bundle.min.js"></script>
 
+    <script>
 
+            document.addEventListener("DOMContentLoaded", function() {
+
+                const sidebar = document.querySelector(".admin-sidebar");
+                const menuButton = document.getElementById("mobileMenuButton");
+                const overlay = document.getElementById("sidebarOverlay");
+
+                if (!sidebar || !menuButton || !overlay)
+                    return;
+
+
+                function openSidebar() {
+
+                    sidebar.classList.add("mobile-open");
+                    overlay.classList.add("active");
+
+                    document.body.classList.add("sidebar-open");
+                }
+
+
+                function closeSidebar() {
+
+                    sidebar.classList.remove("mobile-open");
+                    overlay.classList.remove("active");
+
+                    document.body.classList.remove("sidebar-open");
+                }
+
+
+                menuButton.addEventListener("click", function() {
+
+                    if (sidebar.classList.contains("mobile-open"))
+                        closeSidebar();
+                    else
+                        openSidebar();
+
+                });
+
+
+                overlay.addEventListener("click", function() {
+
+                    closeSidebar();
+
+                });
+
+
+                sidebar.querySelectorAll("a").forEach(function(link) {
+
+                    link.addEventListener("click", function() {
+
+                        closeSidebar();
+
+                    });
+
+                });
+
+
+                window.addEventListener("resize", function() {
+
+                    if (window.innerWidth > 767.98)
+                        closeSidebar();
+
+                });
+
+            });
+
+    </script>
     @await RenderSectionAsync(
     "Scripts",
         required: false)
+
+
 
 </body>
 

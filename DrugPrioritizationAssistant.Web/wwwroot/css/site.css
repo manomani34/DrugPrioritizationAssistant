@@ -346,6 +346,33 @@ a {
    Responsive
    ========================================================= */
 
+.mobile-menu-button-wrapper {
+    display: none;
+}
+
+.mobile-menu-button {
+    border: 0;
+    background: transparent;
+    color: var(--dpa-text);
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+    .mobile-menu-button:hover {
+        background: #f3f4f6;
+    }
+
+
+/* =========================================================
+   Tablet
+   ========================================================= */
+
 @media (max-width: 991.98px) {
 
     .admin-sidebar {
@@ -359,39 +386,123 @@ a {
     }
 }
 
+
+/* =========================================================
+   Mobile
+   ========================================================= */
+
 @media (max-width: 767.98px) {
+
+    html,
+    body {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
 
     .admin-wrapper {
         display: block;
+        min-height: 100vh;
     }
 
+
+    /* ---------------------------------------------------------
+       Sidebar
+       --------------------------------------------------------- */
+
     .admin-sidebar {
-        position: relative;
-        width: 100%;
-        min-width: 100%;
-        min-height: auto;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 270px;
+        min-width: 270px;
+        min-height: 100vh;
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+        z-index: 1100;
+        box-shadow: -6px 0 20px rgba(0, 0, 0, 0.15);
     }
+
+
+        .admin-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+
+    /* ---------------------------------------------------------
+       Main
+       --------------------------------------------------------- */
 
     .admin-main {
         width: 100%;
         margin-right: 0;
+        min-height: 100vh;
     }
+
+
+    /* ---------------------------------------------------------
+       Navbar
+       --------------------------------------------------------- */
 
     .admin-navbar {
-        position: relative;
+        height: 64px;
+        padding: 0 16px;
+        position: sticky;
+        top: 0;
+        z-index: 900;
     }
+
+
+    .mobile-menu-button-wrapper {
+        display: block;
+        order: 2;
+    }
+
+
+    .admin-navbar > div:not(.mobile-menu-button-wrapper) {
+        flex: 1;
+    }
+
+
+    .page-title {
+        font-size: 16px;
+    }
+
+
+    .page-breadcrumb {
+        font-size: 10px;
+    }
+
+
+    .admin-user {
+        display: none;
+    }
+
+
+    /* ---------------------------------------------------------
+       Content
+       --------------------------------------------------------- */
 
     .admin-content {
-        padding: 18px;
+        padding: 16px;
     }
 
+
+    /* ---------------------------------------------------------
+       Sidebar
+       --------------------------------------------------------- */
+
     .sidebar-menu {
-        max-height: 400px;
+        max-height: none;
+        overflow-y: auto;
     }
+
 
     .sidebar-footer form {
         margin: 0;
     }
+
 
     .sidebar-logout {
         width: 100%;
@@ -401,8 +512,48 @@ a {
         text-align: right;
     }
 
+
         .sidebar-logout:hover {
-            color: #dc2626;
-            background: #fef2f2;
+            color: #ffffff;
+            background: var(--dpa-sidebar-hover);
         }
+
+
+    /* ---------------------------------------------------------
+       Overlay
+       --------------------------------------------------------- */
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+        z-index: 1050;
+    }
+
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
 }
+
+
+/* =========================================================
+   Desktop
+   ========================================================= */
+
+@media (min-width: 768px) {
+
+    .sidebar-overlay {
+        display: none;
+    }
+}
+
